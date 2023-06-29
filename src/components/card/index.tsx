@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import sdk, {
+import {
+  SpeechConfig,
   SpeechSynthesizer,
   AudioConfig,
 } from "microsoft-cognitiveservices-speech-sdk";
@@ -111,7 +112,7 @@ export function CardInHome() {
   });
 
   function handlePlayBtn() {
-    const speechConfig = sdk.SpeechConfig.fromSubscription(
+    const speechConfig = SpeechConfig.fromSubscription(
       process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
       process.env.NEXT_PUBLIC_REGION!
     );
@@ -251,9 +252,7 @@ export function CardInHistory(props: IProps) {
   }, []);
 
   function handlePlayBtn() {
-    var sdk = require("microsoft-cognitiveservices-speech-sdk");
-
-    const speechConfig = sdk.SpeechConfig.fromSubscription(
+    const speechConfig = SpeechConfig.fromSubscription(
       "c61f77c2d4de4872af6c0bb6f92e2dcb",
       "eastasia"
     );
