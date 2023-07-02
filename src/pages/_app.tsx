@@ -25,7 +25,7 @@ const authLink = new ApolloLink((operation, forward) => {
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: authLink.concat(
-    new HttpLink({ uri: "http://35.239.19.68:8080/v1/graphql" })
+    new HttpLink({ uri: "https://japanese-memo.app/v1/graphql" })
   ),
 });
 
