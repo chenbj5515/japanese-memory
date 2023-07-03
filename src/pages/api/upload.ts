@@ -14,7 +14,7 @@ export default async function handler(req: any, res: any) {
   upload(req, res, (error: any) => {
     if (error) {
       console.error("文件上传失败：", error);
-      return res.status(500).json({ error: "文件上传失败" });
+      return res.status(500).json({ error });
     }
     console.log("sucess");
 
