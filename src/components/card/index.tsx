@@ -167,7 +167,7 @@ export function CardInHome() {
           ></path>
         </svg>
       </div>
-      <div className="whitespace-pre-wrap">{text}</div>
+      <div className="whitespace-pre-wrap pr-[42px]">{text}</div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
         {cardIDRef.current ? (
           <>
@@ -233,7 +233,8 @@ export function CardInHistory(props: IProps) {
         body: formData,
       });
       const audio = document.createElement("audio");
-      audio.src = `https://storage.cloud.google.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.mp3`;
+      // audio.src = "https://storage.googleapis.com/hallucinogenic_videos/bcf66aee-6528-4582-8e7e-700ed21d4375.mp3";
+      audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.mp3`;
       audioRef.current = audio;
       updateCardRecordPath({
         variables: {

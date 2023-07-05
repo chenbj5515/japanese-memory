@@ -37,9 +37,8 @@ export default async function handler(req: any, res: any) {
       metadata: {
         contentType: "audio/mp3",
       },
-    });
-  
-    return res.status(200).json({ message: "文件上传成功" });
+    }).then(() => res.status(200).json({ message: "文件上传成功" }))
+    .catch(err => res.status(200).json({ err }))
   });
 }
 
