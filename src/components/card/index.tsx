@@ -143,7 +143,7 @@ export function CardInHome() {
   }
 
   return (
-    <div className="card p-5 width-80-880 mx-auto mt-10 relative">
+    <div className="card p-5 width-92-675 mx-auto mt-10 relative">
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         刚刚
       </div>
@@ -285,7 +285,7 @@ export function CardInHistory(props: IProps) {
   }
 
   return (
-    <div className="card p-5 width-80-880 mx-auto mt-10 relative">
+    <div className="card p-5 width-92-675 mx-auto mt-10 relative">
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         {getTimeAgo(createTime)}
       </div>
