@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import Script from 'next/script';
 import {
   ApolloClient,
   InMemoryCache,
@@ -7,8 +8,6 @@ import {
   ApolloLink,
   HttpLink,
 } from "@apollo/client";
-import React from "react";
-import VConsole from "vconsole";
 import { Provider } from "react-redux";
 import "remixicon/fonts/remixicon.css";
 import store from "@/store";
@@ -32,15 +31,14 @@ const client = new ApolloClient({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
-  React.useEffect(() => {
-    new VConsole();
-  }, []);
   return (
     <ApolloProvider client={client}>
       {/* <VConsole /> */}
       <Provider store={store}>
         <Component {...pageProps} />
       </Provider>
+      {/* @ts-ignore */}
+      <Script src='https://unpkg.com/vconsole@latest/dist/vconsole.min.js' onLoad={() => { const vConsole = new window.VConsole(); console.log(vConsole) }} />
     </ApolloProvider>
   );
 }

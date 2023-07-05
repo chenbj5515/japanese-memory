@@ -2,6 +2,9 @@
 import { useSelector } from "react-redux";
 import "remixicon/fonts/remixicon.css";
 import { CardList, CardInHome, InputBox, Aside } from "../components";
+// const DynamicComponent = dynamic(() => import("../components/vconsole"), { ssr: false, });
+
+
 
 export default function Home() {
   const { state } = useSelector((state: any) => state.cardDataSlice);
