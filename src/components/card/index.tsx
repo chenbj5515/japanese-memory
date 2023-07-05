@@ -219,7 +219,7 @@ export function CardInHistory(props: IProps) {
     async onEnd(recordedChunks) {
       const audioBlob = new Blob(recordedChunks, { type: "audio/mp3" });
       const formData = new FormData();
-      const recordFileName = `${cardID}_${new Date().getTime()}.mp3`;
+      const recordFileName = `${cardID}.mp3`;
       formData.append("audio", audioBlob, recordFileName);
       await fetch("/api/delete-record", {
         method: "POST",
@@ -233,12 +233,12 @@ export function CardInHistory(props: IProps) {
         body: formData,
       });
       const audio = document.createElement("audio");
-      audio.src = `/uploads/${recordFileName}`;
+      audio.src = `https://storage.cloud.google.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.mp3`;
       audioRef.current = audio;
       updateCardRecordPath({
         variables: {
           id: cardID,
-          record_file_path: `/uploads/${recordFileName}`,
+          record_file_path: audio.src,
           update_time: new Date(),
         },
       });
@@ -253,7 +253,7 @@ export function CardInHistory(props: IProps) {
 
   function handlePlayBtn() {
     const speechConfig = SpeechConfig.fromSubscription(
-      "c61f77c2d4de4872af6c0bb6f92e2dcb",
+      process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
       "eastasia"
     );
 
@@ -279,6 +279,7 @@ export function CardInHistory(props: IProps) {
 
   function handleRecordPlayBtnClick() {
     setRecordPlayBtnPressed((prev) => !prev);
+    console.log(audioRef.current?.src)
     audioRef.current?.play();
   }
 
