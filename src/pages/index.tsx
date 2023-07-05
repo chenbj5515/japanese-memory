@@ -8,7 +8,7 @@ export default function Home() {
 
   return (
     <main className="flex">
-      <Aside />
+      {/* <Aside /> */}
       <div className="flex-grow relative text-[16px] font-Default">
         <div className="h-[100%] overflow-auto pb-[90px]">
           {state === "hidden" || state === "inserted" ? null : <CardInHome />}

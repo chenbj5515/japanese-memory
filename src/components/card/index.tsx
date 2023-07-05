@@ -221,13 +221,13 @@ export function CardInHistory(props: IProps) {
       const formData = new FormData();
       const recordFileName = `${cardID}.mp3`;
       formData.append("audio", audioBlob, recordFileName);
-      await fetch("/api/delete-record", {
-        method: "POST",
-        body: JSON.stringify({
-          prefix: cardID,
-        }),
-      });
-      console.log("删除完成");
+      // await fetch("/api/delete-record", {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     prefix: cardID,
+      //   }),
+      // });
+      // console.log("删除完成");
       await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -308,7 +308,7 @@ export function CardInHistory(props: IProps) {
           ></path>
         </svg>
       </div>
-      <div className="whitespace-pre-wrap">{text}</div>
+      <div className="whitespace-pre-wrap pr-[42px]">{text}</div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
         {/* 录音按钮 */}
         <div className="toggle w-[40px] h-[40px] mr-[30px]">
