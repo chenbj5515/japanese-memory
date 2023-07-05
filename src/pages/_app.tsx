@@ -7,9 +7,11 @@ import {
   ApolloLink,
   HttpLink,
 } from "@apollo/client";
+import React from "react";
+import VConsole from "vconsole";
 import { Provider } from "react-redux";
 import "remixicon/fonts/remixicon.css";
-import store from '@/store'
+import store from "@/store";
 
 const authLink = new ApolloLink((operation, forward) => {
   // 将访问令牌添加到请求头
@@ -30,8 +32,12 @@ const client = new ApolloClient({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
+  React.useEffect(() => {
+    new VConsole();
+  }, []);
   return (
     <ApolloProvider client={client}>
+      {/* <VConsole /> */}
       <Provider store={store}>
         <Component {...pageProps} />
       </Provider>
