@@ -17,6 +17,7 @@ export function useRecorder({ onEnd }: IParams) {
       .then((stream) => {
         let mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
+        console.log("获取到录音权限")
 
         mediaRecorder.addEventListener("dataavailable", (event: any) => {
           if (event.data.size > 0) {
