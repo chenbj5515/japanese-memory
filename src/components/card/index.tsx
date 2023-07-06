@@ -138,7 +138,7 @@ export function CardInHome() {
   }
 
   function handleRecordPlayBtnClick() {
-    setRecordPlayBtnPressed((prev) => !prev);
+    setRecordPlayBtnPressed(prev => !prev);
     audioRef.current?.play();
   }
 
@@ -217,9 +217,9 @@ export function CardInHistory(props: IProps) {
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
-      const audioBlob = new Blob(recordedChunks, { type: "audio/mp3" });
+      const audioBlob = new Blob(recordedChunks, { type: "audio/acc" });
       const formData = new FormData();
-      const recordFileName = `${cardID}.mp3`;
+      const recordFileName = `${cardID}.acc`;
       formData.append("audio", audioBlob, recordFileName);
       // await fetch("/api/delete-record", {
       //   method: "POST",
@@ -232,9 +232,11 @@ export function CardInHistory(props: IProps) {
         method: "POST",
         body: formData,
       });
+      // console.log(audioBlob, URL.createObjectURL(audioBlob), "audioBlob=========")
       const audio = document.createElement("audio");
       // audio.src = "https://storage.googleapis.com/hallucinogenic_videos/bcf66aee-6528-4582-8e7e-700ed21d4375.mp3";
-      audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.mp3`;
+      audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.acc`;
+      // audio.src = URL.createObjectURL(audioBlob);
       audioRef.current = audio;
       updateCardRecordPath({
         variables: {
@@ -280,7 +282,7 @@ export function CardInHistory(props: IProps) {
 
   function handleRecordPlayBtnClick() {
     setRecordPlayBtnPressed((prev) => !prev);
-    console.log(audioRef.current?.src)
+    console.log(audioRef.current?.src);
     audioRef.current?.play();
   }
 
