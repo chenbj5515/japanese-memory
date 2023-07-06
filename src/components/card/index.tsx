@@ -111,7 +111,8 @@ export function CardInHome() {
     },
   });
 
-  function handlePlayBtn() {
+  const ref = React.useRef<any>(null);
+  React.useEffect(() => {
     const speechConfig = SpeechConfig.fromSubscription(
       process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
       process.env.NEXT_PUBLIC_REGION!
@@ -122,8 +123,11 @@ export function CardInHome() {
     const audioConfig = AudioConfig.fromDefaultSpeakerOutput();
 
     const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
+    ref.current = synthesizer;
+  }, []);
 
-    synthesizer.speakTextAsync(originalText);
+  function handlePlayBtn() {
+    ref.current?.speakTextAsync(originalText);
   }
 
   function handleRecordBtnClick() {
