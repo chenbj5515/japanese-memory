@@ -86,46 +86,8 @@ export function CardInHome(props: IProps) {
     text: "",
     id: "",
   });
-  const calledRef = React.useRef(false);
 
   React.useEffect(() => {
-    // if (!calledRef.current) {
-    //   calledRef.current = true;
-    //   console.log("callChatApi");
-    //   callChatApi(originalText, {
-    //     async onopen() {
-    //       dispatch({
-    //         type: "updateTextStream",
-    //         text: `原文：${originalText}\n\n`,
-    //       });
-    //     },
-    //     onmessage(event: any) {
-    //       if (event.data === "[DONE]") {
-    //         return;
-    //       }
-    //       const parsedData = JSON.parse(event.data);
-    //       const curText = parsedData.choices
-    //         .map((choice: any) => {
-    //           if (choice.delta) {
-    //             return choice.delta.content;
-    //           }
-    //           return "";
-    //         })
-    //         .join("");
-    //       dispatch({
-    //         type: "updateTextStream",
-    //         text: curText,
-    //       });
-    //     },
-    //     async onclose() {
-    //       dispatch({
-    //         type: "updateState",
-    //         state: "closed",
-    //       });
-    //     },
-    //     onerror() {},
-    //   });
-    // }
     callChatApi(originalText, {
       async onopen() {
         dispatch({
@@ -160,6 +122,7 @@ export function CardInHome(props: IProps) {
       onerror() {},
     });
   }, []);
+
   const audioRef = React.useRef<any>();
   const [insertCard] = useMutation(INSERT_CARD_MUTATION);
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
@@ -297,9 +260,11 @@ export function CardInHistory(props: IHistoryCardProps) {
   const { text, originalText, recorderPath, createTime, cardID } = props;
   const audioRef = React.useRef<any>();
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
+  const [recorderLoading, setRecordedLoading] = React.useState(false);
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
+      setRecordedLoading(true);
       const audioBlob = new Blob(recordedChunks, { type: "audio/acc" });
       const formData = new FormData();
       const recordFileName = `${cardID}.acc`;
@@ -311,13 +276,14 @@ export function CardInHistory(props: IHistoryCardProps) {
       const audio = document.createElement("audio");
       audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.acc`;
       audioRef.current = audio;
-      updateCardRecordPath({
+      await updateCardRecordPath({
         variables: {
           id: cardID,
           record_file_path: audio.src,
           update_time: new Date(),
         },
       });
+      setRecordedLoading(false);
     },
   });
 
@@ -387,16 +353,26 @@ export function CardInHistory(props: IHistoryCardProps) {
           />
           <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
         </div>
+
         {/* 录音播放按钮 */}
         <div className="toggle w-[40px] h-[40px]">
-          <i className="text-[22px] ri-play-circle-fill z-[10] absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2"></i>
-          <input
-            checked={recordPlayBtnPressed}
-            onChange={handleRecordPlayBtnClick}
-            type="checkbox"
-            className="absolute z-[11]"
-          />
-          <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
+          {/* 录音按钮更新中的loading */}
+          {recorderLoading ? (
+            <div className="spinner w-[40px] h-[40px]">
+              <div className="spinnerin"></div>
+            </div>
+          ) : (
+            <>
+              <i className="text-[22px] ri-play-circle-fill z-[10] absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2"></i>
+              <input
+                checked={recordPlayBtnPressed}
+                onChange={handleRecordPlayBtnClick}
+                type="checkbox"
+                className="absolute z-[11]"
+              />
+              <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
+            </>
+          )}
         </div>
       </div>
     </div>
