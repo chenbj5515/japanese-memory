@@ -69,7 +69,7 @@ export function InputBox() {
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
           fill="none"
-          className="h-4 w-4 m-1 md:m-0 absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 right-4 cursor-pointer"
+          className="h-4 w-4 absolute left-[50%] top-[50%] -translate-x-[42%] -translate-y-1/2 cursor-pointer"
           strokeWidth="2"
         >
           <path
