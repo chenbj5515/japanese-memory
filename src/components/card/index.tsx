@@ -126,7 +126,7 @@ export function CardInHome() {
     );
 
     speechConfig.speechSynthesisVoiceName = "ja-JP-NanamiNeural"; // 使用Nanami Online (Natural) - Japanese (Japan)语音
-    speechConfig.speechSynthesisOutputFormat;
+    speechConfig.speechSynthesisOutputFormat = 8;
 
     const player = new SpeakerAudioDestination();
     const audioConfig = AudioConfig.fromSpeakerOutput(player);
