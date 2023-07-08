@@ -1,11 +1,11 @@
 import React from "react";
 import { gql, useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
-import { CardInHistory } from "../card";
+import { CardInHistory, CardInHome } from "../card";
 
 const GET_CARD = gql`
   query GetMemoCard {
-    memo_card(order_by: { create_time: desc }) {
+    memo_card(order_by: { create_time: asc }) {
       content
       original_text
       record_file_path
@@ -29,19 +29,19 @@ interface IMemoCard {
   memo_card: ICard[];
 }
 
-export function CardList() {
-  const { loading, data, refetch } = useQuery<IMemoCard>(GET_CARD);
-  const { state } = useSelector(
-    (state: any) => state.cardDataSlice
+interface IProps {
+  type: "history" | "local"
+}
+
+export default function CardList(props: IProps) {
+  const { loading, data } = useQuery<IMemoCard>(GET_CARD);
+  const {type} = props;
+
+  const { localCards } = useSelector(
+    (state: any) => state.localCardsSlice
   );
 
-  React.useEffect(() => {
-    if (state === "inserted") {
-      refetch();
-    }
-  }, [state]);
-
-  if (loading) {
+  if (type === "history" && loading) {
     return (
       <div className="pyramid-loader">
         <div className="wrapper">
@@ -55,18 +55,28 @@ export function CardList() {
     );
   }
 
+  if (type === "history") {
+    return (
+      <>
+        {data?.memo_card?.map(({ content, original_text, record_file_path, create_time, id }) => (
+          <CardInHistory
+            key={id}
+            text={content}
+            originalText={original_text}
+            recorderPath={record_file_path}
+            createTime={create_time}
+            cardID={id}
+          />
+        ))}
+      </>
+    );
+  }
+
   return (
     <>
-      {data?.memo_card?.map(({ content, original_text, record_file_path, create_time, id }) => (
-        <CardInHistory
-          key={id}
-          text={content}
-          originalText={original_text}
-          recorderPath={record_file_path}
-          createTime={create_time}
-          cardID={id}
-        />
-      ))}
-    </>
-  );
+        {localCards?.map(({originalText, id}: any) => (
+          <CardInHome key={id} originalText={originalText} />
+        ))}
+      </>
+  )
 }

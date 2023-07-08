@@ -33,12 +33,11 @@ const client = new ApolloClient({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={client}>
-      {/* <VConsole /> */}
       <Provider store={store}>
         <Component {...pageProps} />
       </Provider>
       {/* @ts-ignore */}
-      <Script src='https://unpkg.com/vconsole@latest/dist/vconsole.min.js' onLoad={() => { const vConsole = new window.VConsole(); console.log(vConsole) }} />
+      {/* <Script src='https://unpkg.com/vconsole@latest/dist/vconsole.min.js' onLoad={() => { const vConsole = new window.VConsole(); console.log(vConsole) }} /> */}
     </ApolloProvider>
   );
 }

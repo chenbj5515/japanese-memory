@@ -1,28 +1,9 @@
 import { useRef, useReducer } from "react";
 import { useDispatch } from "react-redux";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
-import {
-  showCard,
-  addText,
-  updateState,
-} from "@/components/card/card-data-slice";
+import { addCard } from "../card-list/loacl-cards-slice";
 import { insertPlainTextAtCursor } from "@/utils";
 import { useForceUpdate } from "@/hooks";
 import { allowSendStatereducer } from "./reducers";
-
-const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-const apiUrl = "https://api.openai.com/v1/chat/completions";
-const prompt =
-  "对给出的日文文本，给出翻译、假名表示的读音和语法分析。注意，语法分析的时候，被分析的原文也需要给出读音。";
-const headers = {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${apiKey}`,
-};
-const data = {
-  model: "gpt-3.5-turbo-0301",
-  max_tokens: 1000,
-  stream: true,
-};
 
 export function InputBox() {
   const editableRef = useRef<any>();
@@ -36,49 +17,10 @@ export function InputBox() {
 
   function handleSendBtnClick() {
     const content = editableRef.current.textContent;
-    fetchEventSource(apiUrl, {
-      method: "POST",
-      body: JSON.stringify({
-        ...data,
-        messages: [
-          { role: "system", content: prompt },
-          { role: "user", content },
-        ],
-      }),
-      headers,
-      openWhenHidden: true,
-      async onopen(res) {
-        dispatch(
-          showCard({
-            text: `原文：${content}\n\n`,
-            originalText: content,
-          })
-        );
-      },
-      onmessage(event) {
-        if (event.data === "[DONE]") {
-          return;
-        }
-        const parsedData = JSON.parse(event.data);
-        const curText = parsedData.choices
-          .map((choice: any) => {
-            if (choice.delta) {
-              return choice.delta.content;
-            }
-            return "";
-          })
-          .join("");
-        dispatch(
-          addText({
-            text: curText,
-          })
-        );
-      },
-      async onclose() {
-        dispatch(updateState("ended"));
-      },
-      onerror(err) {},
-    });
+    dispatch(addCard({
+      originalText: content,
+    }))
+
     if (editableRef.current) {
       editableRef.current.textContent = "";
       forUpdate();

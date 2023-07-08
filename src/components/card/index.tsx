@@ -1,15 +1,7 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  SpeechConfig,
-  SpeechSynthesizer,
-  AudioConfig,
-  SpeakerAudioDestination
-} from "microsoft-cognitiveservices-speech-sdk";
 import { gql, useMutation } from "@apollo/client";
 import { useRecorder } from "./hooks/use-recorder";
-import { getTimeAgo } from "@/utils";
-import { updateState } from "./card-data-slice";
+import { getTimeAgo, speakText, callChatApi } from "@/utils";
 
 const UPDATE_CARD_RECORD_PATH = gql`
   mutation UpdateMemoCard(
@@ -53,20 +45,127 @@ const INSERT_CARD_MUTATION = gql`
   }
 `;
 
-export function CardInHome() {
+interface IProps {
+  originalText: string;
+}
+
+interface IState {
+  text: string;
+  state: string;
+  id: string;
+}
+
+type Action =
+  | {
+      type: "updateTextStream";
+      text: string;
+    }
+  | {
+      type: "updateState";
+      state: string;
+    };
+
+const reducer = (state: IState, action: Action): IState => {
+  switch (action.type) {
+    case "updateTextStream":
+      return { ...state, text: state.text + action.text };
+    case "updateState":
+      return { ...state, state: action.state };
+    default:
+      return state;
+  }
+};
+
+export function CardInHome(props: IProps) {
   const [recorderPressed, setRecorderPressedState] = React.useState(false);
   const [recordPlayBtnPressed, setRecordPlayBtnPressed] = React.useState(false);
   const cardIDRef = React.useRef("");
-  const { text, originalText, state } = useSelector(
-    (state: any) => state.cardDataSlice
-  );
-  const dispatch = useDispatch();
+  const { originalText } = props;
+  const [{ state, text }, dispatch] = React.useReducer(reducer, {
+    state: "initial",
+    text: "",
+    id: "",
+  });
+  const calledRef = React.useRef(false);
+
+  React.useEffect(() => {
+    // if (!calledRef.current) {
+    //   calledRef.current = true;
+    //   console.log("callChatApi");
+    //   callChatApi(originalText, {
+    //     async onopen() {
+    //       dispatch({
+    //         type: "updateTextStream",
+    //         text: `原文：${originalText}\n\n`,
+    //       });
+    //     },
+    //     onmessage(event: any) {
+    //       if (event.data === "[DONE]") {
+    //         return;
+    //       }
+    //       const parsedData = JSON.parse(event.data);
+    //       const curText = parsedData.choices
+    //         .map((choice: any) => {
+    //           if (choice.delta) {
+    //             return choice.delta.content;
+    //           }
+    //           return "";
+    //         })
+    //         .join("");
+    //       dispatch({
+    //         type: "updateTextStream",
+    //         text: curText,
+    //       });
+    //     },
+    //     async onclose() {
+    //       dispatch({
+    //         type: "updateState",
+    //         state: "closed",
+    //       });
+    //     },
+    //     onerror() {},
+    //   });
+    // }
+    callChatApi(originalText, {
+      async onopen() {
+        dispatch({
+          type: "updateTextStream",
+          text: `原文：${originalText}\n\n`,
+        });
+      },
+      onmessage(event: any) {
+        if (event.data === "[DONE]") {
+          return;
+        }
+        const parsedData = JSON.parse(event.data);
+        const curText = parsedData.choices
+          .map((choice: any) => {
+            if (choice.delta) {
+              return choice.delta.content;
+            }
+            return "";
+          })
+          .join("");
+        dispatch({
+          type: "updateTextStream",
+          text: curText,
+        });
+      },
+      async onclose() {
+        dispatch({
+          type: "updateState",
+          state: "closed",
+        });
+      },
+      onerror() {},
+    });
+  }, []);
   const audioRef = React.useRef<any>();
   const [insertCard] = useMutation(INSERT_CARD_MUTATION);
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
 
   React.useEffect(() => {
-    if (state === "ended") {
+    if (state === "closed") {
       insertCard({
         variables: {
           content: text,
@@ -76,7 +175,6 @@ export function CardInHome() {
         },
       }).then((res) => {
         cardIDRef.current = res.data.insert_memo_card.returning[0].id;
-        dispatch(updateState("inserted"));
       });
     }
   }, [state]);
@@ -84,55 +182,31 @@ export function CardInHome() {
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
       const cardID = cardIDRef.current;
-      const audioBlob = new Blob(recordedChunks, { type: "audio/mp3" });
+      const audioBlob = new Blob(recordedChunks, { type: "audio/acc" });
       const formData = new FormData();
-      const recordFileName = `${cardID}_${new Date().getTime()}.mp3`;
+      const recordFileName = `${cardID}.acc`;
       formData.append("audio", audioBlob, recordFileName);
-      await fetch("/api/delete-record", {
-        method: "POST",
-        body: JSON.stringify({
-          prefix: cardID,
-        }),
-      });
-      console.log("删除完成");
       await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
       const audio = document.createElement("audio");
-      audio.src = `/uploads/${recordFileName}`;
+      audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.acc`;
       audioRef.current = audio;
       updateCardRecordPath({
         variables: {
           id: cardID,
-          record_file_path: `/uploads/${recordFileName}`,
+          record_file_path: audio.src,
           update_time: new Date(),
         },
       });
     },
   });
 
-  const ref = React.useRef<any>(null);
-  // React.useEffect(() => {
-    
-
-  //   ref.current = synthesizer;
-  // }, []);
-
   function handlePlayBtn() {
-    const speechConfig = SpeechConfig.fromSubscription(
-      process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
-      process.env.NEXT_PUBLIC_REGION!
-    );
-
-    speechConfig.speechSynthesisVoiceName = "ja-JP-NanamiNeural"; // 使用Nanami Online (Natural) - Japanese (Japan)语音
-    speechConfig.speechSynthesisOutputFormat = 8;
-
-    const player = new SpeakerAudioDestination();
-    const audioConfig = AudioConfig.fromSpeakerOutput(player);
-
-    const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-    synthesizer.speakTextAsync(originalText);
+    speakText(originalText, {
+      voicerName: "ja-JP-NanamiNeural",
+    });
   }
 
   function handleRecordBtnClick() {
@@ -147,7 +221,7 @@ export function CardInHome() {
   }
 
   function handleRecordPlayBtnClick() {
-    setRecordPlayBtnPressed(prev => !prev);
+    setRecordPlayBtnPressed((prev) => !prev);
     audioRef.current?.play();
   }
 
@@ -209,7 +283,7 @@ export function CardInHome() {
   );
 }
 
-interface IProps {
+interface IHistoryCardProps {
   text: string;
   originalText: string;
   recorderPath: string;
@@ -217,7 +291,7 @@ interface IProps {
   cardID: string;
 }
 
-export function CardInHistory(props: IProps) {
+export function CardInHistory(props: IHistoryCardProps) {
   const [recorderPressed, setRecorderPressedState] = React.useState(false);
   const [recordPlayBtnPressed, setRecordPlayBtnPressed] = React.useState(false);
   const { text, originalText, recorderPath, createTime, cardID } = props;
@@ -230,22 +304,12 @@ export function CardInHistory(props: IProps) {
       const formData = new FormData();
       const recordFileName = `${cardID}.acc`;
       formData.append("audio", audioBlob, recordFileName);
-      // await fetch("/api/delete-record", {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     prefix: cardID,
-      //   }),
-      // });
-      // console.log("删除完成");
       await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
-      // console.log(audioBlob, URL.createObjectURL(audioBlob), "audioBlob=========")
       const audio = document.createElement("audio");
-      // audio.src = "https://storage.googleapis.com/hallucinogenic_videos/bcf66aee-6528-4582-8e7e-700ed21d4375.mp3";
       audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.acc`;
-      // audio.src = URL.createObjectURL(audioBlob);
       audioRef.current = audio;
       updateCardRecordPath({
         variables: {
@@ -264,26 +328,9 @@ export function CardInHistory(props: IProps) {
   }, []);
 
   function handlePlayBtn() {
-    const speechConfig = SpeechConfig.fromSubscription(
-      process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
-      process.env.NEXT_PUBLIC_REGION!
-    );
-
-    speechConfig.speechSynthesisVoiceName = "ja-JP-NanamiNeural"; // 使用Nanami Online (Natural) - Japanese (Japan)语音
-    speechConfig.speechSynthesisOutputFormat = 8;
-    const complete_cb = function () {
-      synthesizer?.close();
-      synthesizer = undefined;
-    };
-    const err_cb = function () {
-      synthesizer?.close();
-    };
-
-    const player = new SpeakerAudioDestination();
-    const audioConfig = AudioConfig.fromSpeakerOutput(player);
-
-    let synthesizer: SpeechSynthesizer | undefined = new SpeechSynthesizer(speechConfig, audioConfig);
-    synthesizer.speakTextAsync(originalText, complete_cb, err_cb);
+    speakText(originalText, {
+      voicerName: "ja-JP-NanamiNeural",
+    });
   }
 
   function handleRecordBtnClick() {
@@ -299,7 +346,6 @@ export function CardInHistory(props: IProps) {
 
   function handleRecordPlayBtnClick() {
     setRecordPlayBtnPressed((prev) => !prev);
-    console.log(audioRef.current?.src);
     audioRef.current?.play();
   }
 
