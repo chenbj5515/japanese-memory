@@ -4,6 +4,7 @@ import {
   SpeechConfig,
   SpeechSynthesizer,
   AudioConfig,
+  SpeakerAudioDestination
 } from "microsoft-cognitiveservices-speech-sdk";
 import { gql, useMutation } from "@apollo/client";
 import { useRecorder } from "./hooks/use-recorder";
@@ -112,7 +113,13 @@ export function CardInHome() {
   });
 
   const ref = React.useRef<any>(null);
-  React.useEffect(() => {
+  // React.useEffect(() => {
+    
+
+  //   ref.current = synthesizer;
+  // }, []);
+
+  function handlePlayBtn() {
     const speechConfig = SpeechConfig.fromSubscription(
       process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
       process.env.NEXT_PUBLIC_REGION!
@@ -120,14 +127,14 @@ export function CardInHome() {
 
     speechConfig.speechSynthesisVoiceName = "ja-JP-NanamiNeural"; // 使用Nanami Online (Natural) - Japanese (Japan)语音
 
-    const audioConfig = AudioConfig.fromDefaultSpeakerOutput();
+    // const audioConfig = AudioConfig.fromDefaultSpeakerOutput();
+
+
+    const player = new SpeakerAudioDestination();
+    var audioConfig = AudioConfig.fromSpeakerOutput(player);
 
     const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-    ref.current = synthesizer;
-  }, []);
-
-  function handlePlayBtn() {
-    ref.current?.speakTextAsync(originalText);
+    synthesizer.speakTextAsync(originalText);
   }
 
   function handleRecordBtnClick() {
