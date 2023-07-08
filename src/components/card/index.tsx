@@ -266,15 +266,16 @@ export function CardInHistory(props: IProps) {
   function handlePlayBtn() {
     const speechConfig = SpeechConfig.fromSubscription(
       process.env.NEXT_PUBLIC_SUBSCRIPTION_KEY!,
-      "eastasia"
+      process.env.NEXT_PUBLIC_REGION!
     );
 
     speechConfig.speechSynthesisVoiceName = "ja-JP-NanamiNeural"; // 使用Nanami Online (Natural) - Japanese (Japan)语音
+    speechConfig.speechSynthesisOutputFormat = 8;
 
-    const audioConfig = AudioConfig.fromDefaultSpeakerOutput();
+    const player = new SpeakerAudioDestination();
+    const audioConfig = AudioConfig.fromSpeakerOutput(player);
 
     const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-
     synthesizer.speakTextAsync(originalText);
   }
 
