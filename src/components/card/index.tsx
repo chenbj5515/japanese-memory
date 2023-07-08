@@ -271,12 +271,19 @@ export function CardInHistory(props: IProps) {
 
     speechConfig.speechSynthesisVoiceName = "ja-JP-NanamiNeural"; // 使用Nanami Online (Natural) - Japanese (Japan)语音
     speechConfig.speechSynthesisOutputFormat = 8;
+    const complete_cb = function () {
+      synthesizer?.close();
+      synthesizer = undefined;
+    };
+    const err_cb = function () {
+      synthesizer?.close();
+    };
 
     const player = new SpeakerAudioDestination();
     const audioConfig = AudioConfig.fromSpeakerOutput(player);
 
-    const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
-    synthesizer.speakTextAsync(originalText);
+    let synthesizer: SpeechSynthesizer | undefined = new SpeechSynthesizer(speechConfig, audioConfig);
+    synthesizer.speakTextAsync(originalText, complete_cb, err_cb);
   }
 
   function handleRecordBtnClick() {
