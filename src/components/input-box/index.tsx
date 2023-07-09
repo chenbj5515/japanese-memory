@@ -17,9 +17,11 @@ export function InputBox() {
 
   function handleSendBtnClick() {
     const content = editableRef.current.textContent;
-    dispatch(addCard({
-      originalText: content,
-    }))
+    dispatch(
+      addCard({
+        originalText: content,
+      })
+    );
 
     if (editableRef.current) {
       editableRef.current.textContent = "";
@@ -50,7 +52,7 @@ export function InputBox() {
   };
 
   return (
-    <div>
+    <>
       <div
         ref={editableRef}
         onInput={handleInput}
@@ -78,6 +80,6 @@ export function InputBox() {
           ></path>
         </svg>
       </div>
-    </div>
+    </>
   );
 }

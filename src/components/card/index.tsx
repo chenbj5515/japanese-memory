@@ -2,6 +2,7 @@ import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import { useRecorder } from "./hooks/use-recorder";
 import { getTimeAgo, speakText, callChatApi } from "@/utils";
+import { Dictation } from "@/components";
 
 const UPDATE_CARD_RECORD_PATH = gql`
   mutation UpdateMemoCard(
@@ -81,6 +82,8 @@ export function CardInHome(props: IProps) {
   const [recordPlayBtnPressed, setRecordPlayBtnPressed] = React.useState(false);
   const cardIDRef = React.useRef("");
   const { originalText } = props;
+  const [recorderLoading, setRecordedLoading] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
   const [{ state, text }, dispatch] = React.useReducer(reducer, {
     state: "initial",
     text: "",
@@ -89,12 +92,6 @@ export function CardInHome(props: IProps) {
 
   React.useEffect(() => {
     callChatApi(originalText, {
-      async onopen() {
-        dispatch({
-          type: "updateTextStream",
-          text: `原文：${originalText}\n\n`,
-        });
-      },
       onmessage(event: any) {
         if (event.data === "[DONE]") {
           return;
@@ -144,6 +141,7 @@ export function CardInHome(props: IProps) {
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
+      setRecordedLoading(true);
       const cardID = cardIDRef.current;
       const audioBlob = new Blob(recordedChunks, { type: "audio/acc" });
       const formData = new FormData();
@@ -156,13 +154,14 @@ export function CardInHome(props: IProps) {
       const audio = document.createElement("audio");
       audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}.acc`;
       audioRef.current = audio;
-      updateCardRecordPath({
+      await updateCardRecordPath({
         variables: {
           id: cardID,
           record_file_path: audio.src,
           update_time: new Date(),
         },
       });
+      setRecordedLoading(false);
     },
   });
 
@@ -213,23 +212,36 @@ export function CardInHome(props: IProps) {
           ></path>
         </svg>
       </div>
+      <div className="mb-[28px] relative w-calc100-42">
+        <section
+          className={`rounded-lg absolute ${
+            isFocused ? "glass" : ""
+          }  w-[102%] h-[102%] -left-[4px] -top-[4px]`}
+        ></section>
+        原文：{originalText}
+      </div>
       <div className="whitespace-pre-wrap pr-[42px]">{text}</div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
-        {cardIDRef.current ? (
-          <>
-            {/* 录音按钮 */}
-            <div className="toggle w-[40px] h-[40px] mr-[30px]">
-              <i className="ri-mic-fill z-[10] absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2"></i>
-              <input
-                checked={recorderPressed}
-                onChange={handleRecordBtnClick}
-                type="checkbox"
-                className="double-click absolute z-[11]"
-              />
-              <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
+        {/* 录音按钮 */}
+        <div className="toggle w-[40px] h-[40px] mr-[30px]">
+          <i className="ri-mic-fill z-[10] absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2"></i>
+          <input
+            checked={recorderPressed}
+            onChange={handleRecordBtnClick}
+            type="checkbox"
+            className="double-click absolute z-[11]"
+          />
+          <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
+        </div>
+        {/* 录音播放按钮 */}
+        <div className="toggle w-[40px] h-[40px]">
+          {/* 录音按钮更新中的loading */}
+          {recorderLoading ? (
+            <div className="spinner w-[40px] h-[40px]">
+              <div className="spinnerin"></div>
             </div>
-            {/* 录音播放按钮 */}
-            <div className="toggle w-[40px] h-[40px]">
+          ) : (
+            <>
               <i className="text-[22px] ri-play-circle-fill z-[10] absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2"></i>
               <input
                 checked={recordPlayBtnPressed}
@@ -238,9 +250,12 @@ export function CardInHome(props: IProps) {
                 className="absolute z-[11]"
               />
               <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
-            </div>
-          </>
-        ) : null}
+            </>
+          )}
+        </div>
+      </div>
+      <div className="relative flex flex-col">
+        <Dictation originalText={originalText} isFocused={isFocused} setIsFocused={setIsFocused} />
       </div>
     </div>
   );
@@ -261,6 +276,7 @@ export function CardInHistory(props: IHistoryCardProps) {
   const audioRef = React.useRef<any>();
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
   const [recorderLoading, setRecordedLoading] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
@@ -302,10 +318,8 @@ export function CardInHistory(props: IHistoryCardProps) {
   function handleRecordBtnClick() {
     setRecorderPressedState((prev) => !prev);
     if (recorderPressed) {
-      console.log("结束录制，stop方法被调用");
       mediaRecorderRef.current?.stop();
     } else {
-      console.log("开始录制，start方法被调用");
       mediaRecorderRef.current?.start();
     }
   }
@@ -339,6 +353,14 @@ export function CardInHistory(props: IHistoryCardProps) {
             fillRule="evenodd"
           ></path>
         </svg>
+      </div>
+      <div className="mb-[28px] relative w-calc100-42">
+        <section
+          className={`rounded-lg absolute ${
+            isFocused ? "glass" : ""
+          }  w-[102%] h-[102%] -left-[4px] -top-[4px]`}
+        ></section>
+        原文：{originalText}
       </div>
       <div className="whitespace-pre-wrap pr-[42px]">{text}</div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
@@ -374,6 +396,9 @@ export function CardInHistory(props: IHistoryCardProps) {
             </>
           )}
         </div>
+      </div>
+      <div className="relative flex flex-col">
+        <Dictation originalText={originalText} isFocused={isFocused} setIsFocused={setIsFocused} />
       </div>
     </div>
   );

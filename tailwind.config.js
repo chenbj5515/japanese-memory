@@ -8,7 +8,10 @@ module.exports = {
   theme: {
     colors: {
       dark: "rgb(33 33 33)",
-      black: "rgb(26 26 26)"
+      black: "rgb(26 26 26)",
+      wrong: "rgb(215,2,17)",
+      correct: "limegreen",
+      gray: "#999"
     },
     extend: {
       backgroundImage: {
