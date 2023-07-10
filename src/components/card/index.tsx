@@ -216,7 +216,7 @@ export function CardInHome(props: IProps) {
         <section
           className={`rounded-lg absolute ${
             isFocused ? "glass" : ""
-          }  w-[102%] h-[102%] -left-[4px] -top-[4px]`}
+          }  w-[101%] h-[105%] -left-[4px] -top-[2px]`}
         ></section>
         原文：{originalText}
       </div>
@@ -330,13 +330,13 @@ export function CardInHistory(props: IHistoryCardProps) {
   }
 
   return (
-    <div className="card p-5 width-92-675 mx-auto mt-10 relative">
+    <div className="card dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         {getTimeAgo(createTime)}
       </div>
       {/* AI朗读播放按钮 */}
       <div
-        className="play-button-bg rounded-[50%] w-12 h-12 absolute top-2 right-2 cursor-pointer"
+        className="play-button-bg dark:bg-bgDark dark:shadow-none rounded-[50%] w-12 h-12 absolute top-2 right-2 cursor-pointer"
         onClick={handlePlayBtn}
       >
         <svg
@@ -358,7 +358,7 @@ export function CardInHistory(props: IHistoryCardProps) {
         <section
           className={`rounded-lg absolute ${
             isFocused ? "glass" : ""
-          }  w-[102%] h-[102%] -left-[4px] -top-[4px]`}
+          }  w-[101%] h-[105%] -left-[4px] -top-[2px]`}
         ></section>
         原文：{originalText}
       </div>
@@ -373,7 +373,7 @@ export function CardInHistory(props: IHistoryCardProps) {
             type="checkbox"
             className="double-click absolute z-[11]"
           />
-          <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
+          <span className="button dark:shadow-none dark:bg-bgDark w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
         </div>
 
         {/* 录音播放按钮 */}
@@ -392,12 +392,12 @@ export function CardInHistory(props: IHistoryCardProps) {
                 type="checkbox"
                 className="absolute z-[11]"
               />
-              <span className="button w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
+              <span className="button dark:shadow-none dark:bg-bgDark w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
             </>
           )}
         </div>
       </div>
-      <div className="relative flex flex-col">
+      <div className="relative flex flex-col mt-2">
         <Dictation originalText={originalText} isFocused={isFocused} setIsFocused={setIsFocused} />
       </div>
     </div>

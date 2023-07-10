@@ -15,8 +15,6 @@ export function Dictation(props: IProps) {
   const dictationCheckInputRef = React.useRef<HTMLInputElement>(null);
   const firstRender = React.useRef(true);
 
-  console.log(setIsFocused, "setIsFocused======")
-
   function handleDictationChange() {
     inputContentRef.current = dictationRef.current?.textContent || "";
   }
@@ -64,7 +62,7 @@ export function Dictation(props: IProps) {
 
   return (
     <>
-      <div className="dictation-check-container w-[18px] h-[18px] mt-2 relative">
+      <div className="dictation-check-container dark:shadow-dark-shadow w-[18px] h-[18px] mt-2 relative">
         <input ref={dictationCheckInputRef} type="checkbox" className="hidden" />
         <svg className="overflow-visible" viewBox="0 0 64 64" height="18px" width="18px">
           <path
@@ -80,7 +78,7 @@ export function Dictation(props: IProps) {
           ref={dictationRef}
           className={`${
             !isFocused && diffResult.length ? "hidden" : ""
-          } dictation-input w-full mt-2 text-[15px]`}
+          } dictation-input dark:bg-bgDark dark:shadow-none w-full mt-4 text-[15px]`}
           contentEditable
           placeholder="在这里默写原文"
           onInput={handleDictationChange}
@@ -89,7 +87,7 @@ export function Dictation(props: IProps) {
         />
         {isFocused ? null : diffResult.length ? (
           <div
-            className="dictation-input w-full mt-2 text-[15px]"
+            className="dictation-input dark:bg-bgDark dark:shadow-none w-full mt-[16px] text-[15px]"
             onClick={handleClick}
           >
             <div className="w-full left-0 text-[15px] placeholder pointer-events-none">

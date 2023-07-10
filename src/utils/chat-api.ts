@@ -1,8 +1,7 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 const apiUrl = "https://api.openai.com/v1/chat/completions";
-const prompt =
-  "对给出的日文文本，给出翻译、假名表示的读音和语法分析。注意，语法分析的时候，日文部分也需要给出读音。";
+const prompt = process.env.NEXT_PUBLIC_OPENAI_PROMPT;
 const headers = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
