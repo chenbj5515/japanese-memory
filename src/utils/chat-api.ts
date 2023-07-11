@@ -8,7 +8,7 @@ const headers = {
 };
 const data = {
   model: "gpt-3.5-turbo-0301",
-  max_tokens: 1000,
+  max_tokens: +process.env.NEXT_PUBLIC_OPENAI_API_KEY!,
   stream: true,
 };
 
