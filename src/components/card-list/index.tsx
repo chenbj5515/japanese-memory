@@ -33,7 +33,7 @@ interface IProps {
   type: "history" | "local"
 }
 
-export default function CardList(props: IProps) {
+export function CardList(props: IProps) {
   const { loading, data } = useQuery<IMemoCard>(GET_CARD);
   const {type} = props;
 
