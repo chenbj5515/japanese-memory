@@ -37,7 +37,6 @@ export function Dictation(props: IProps) {
       );
       setDiffResult(diff);
       if (diff.length === 1 && diff[0][0] === 0) {
-        console.log(dictationCheckInputRef.current)
         if (!dictationCheckInputRef.current?.checked) {
           dictationCheckInputRef.current?.click();
         }

@@ -58,7 +58,7 @@ export function InputBox() {
         onInput={handleInput}
         onPaste={handlePaste}
         onKeyDown={handleKeyDown}
-        className="dark:bg-bgDark dark:text-white dark:border-none absolute input bg-[#e8e8e8] left-[50%] bottom-0 transhtmlForm -translate-x-1/2"
+        className="dark:bg-bgDark dark:text-white dark:border-[1px] absolute input bg-[#e8e8e8] left-[50%] bottom-0 transhtmlForm -translate-x-1/2"
         contentEditable
       />
       <div
