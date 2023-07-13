@@ -1,17 +1,19 @@
 import React from "react";
 import { gql, useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
+import { getRandomItemsFromArray } from "@/utils";
 import { CardInHistory, CardInHome } from "../card";
 
 const GET_CARD = gql`
   query GetMemoCard {
-    memo_card(order_by: { create_time: asc }) {
+    memo_card {
       content
       original_text
       record_file_path
       create_time
       update_time
       id
+      review_times
     }
   }
 `;
@@ -23,6 +25,7 @@ interface ICard {
   update_time: string;
   id: string;
   original_text: string;
+  review_times: number;
 }
 
 interface IMemoCard {
@@ -30,16 +33,51 @@ interface IMemoCard {
 }
 
 interface IProps {
-  type: "history" | "local"
+  type: "history" | "local";
+}
+
+const SEVEN_MINS_AGO = 7 * 60 * 1000;
+const EIGHT_HOURS_AGO = 8 * 60 * 60 * 1000;
+const TWO_DAYS_AGO = 2 * 24 * 60 * 60 * 1000;
+const TWO_WEEKS_AGO = 2 * 7 * 24 * 60 * 60 * 1000;
+const TWO_MONTHS_AGO = 2 * 30 * 24 * 60 * 60 * 1000;
+
+function findShouldReviewDatas(data?: IMemoCard) {
+  const resultList = [];
+  for (const item of data?.memo_card || []) {
+    const { create_time, review_times } = item;
+    const timediff = new Date().getTime() - new Date(create_time).getTime();
+    let needReviewTimes = 0;
+    if (timediff > SEVEN_MINS_AGO) {
+      needReviewTimes = 1;
+    }
+    if (timediff > EIGHT_HOURS_AGO) {
+      needReviewTimes = 2;
+    }
+    if (timediff > TWO_DAYS_AGO) {
+      needReviewTimes = 3;
+    }
+    if (timediff > TWO_WEEKS_AGO) {
+      needReviewTimes = 4;
+    }
+    if (timediff > TWO_MONTHS_AGO) {
+      needReviewTimes = 5;
+    }
+    if (review_times < needReviewTimes) {
+      resultList.push({
+        ...item,
+        needReviewTimes,
+      });
+    }
+  }
+  return getRandomItemsFromArray(resultList, 20);
 }
 
 export function CardList(props: IProps) {
   const { loading, data } = useQuery<IMemoCard>(GET_CARD);
-  const {type} = props;
-
-  const { localCards } = useSelector(
-    (state: any) => state.localCardsSlice
-  );
+  const { type } = props;
+  const shouldReviewDatas = findShouldReviewDatas(data);
+  const { localCards } = useSelector((state: any) => state.localCardsSlice);
 
   if (type === "history" && loading) {
     return (
@@ -58,25 +96,27 @@ export function CardList(props: IProps) {
   if (type === "history") {
     return (
       <>
-        {data?.memo_card?.map(({ content, original_text, record_file_path, create_time, id }) => (
-          <CardInHistory
-            key={id}
-            text={content}
-            originalText={original_text}
-            recorderPath={record_file_path}
-            createTime={create_time}
-            cardID={id}
-          />
-        ))}
+        {shouldReviewDatas.map(
+          ({ content, original_text, record_file_path, create_time, id }) => (
+            <CardInHistory
+              key={id}
+              text={content}
+              originalText={original_text}
+              recorderPath={record_file_path}
+              createTime={create_time}
+              cardID={id}
+            />
+          )
+        )}
       </>
     );
   }
 
   return (
     <>
-        {localCards?.map(({originalText, id}: any) => (
-          <CardInHome key={id} originalText={originalText} />
-        ))}
-      </>
-  )
+      {localCards?.map(({ originalText, id }: any) => (
+        <CardInHome key={id} originalText={originalText} />
+      ))}
+    </>
+  );
 }

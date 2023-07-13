@@ -1,19 +1,37 @@
 import React from "react";
+import { gql, useMutation } from "@apollo/client";
 import diff_match_patch from "diff-match-patch";
 
 interface IProps {
   originalText: string;
   isFocused: boolean;
   setIsFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  cardID: string;
 }
 
+const UPDATE_REVIEW_TIMES = gql`
+  mutation UpdateMemoCard(
+    $cardID: uuid!
+  ) {
+    update_memo_card(
+      _inc: { review_times: 1 }
+      where: { id: { _eq: $cardID } }
+    ) {
+      returning {
+        review_times
+      }
+    }
+  }
+`;
+
 export function Dictation(props: IProps) {
-  const { originalText, isFocused, setIsFocused } = props;
+  const { originalText, isFocused, setIsFocused, cardID } = props;
   const dictationRef = React.useRef<HTMLDivElement>(null);
   const [diffResult, setDiffResult] = React.useState([]);
   const inputContentRef = React.useRef("");
   const dictationCheckInputRef = React.useRef<HTMLInputElement>(null);
   const firstRender = React.useRef(true);
+  const [updateCardRecordPath] = useMutation(UPDATE_REVIEW_TIMES);
 
   function handleDictationChange() {
     inputContentRef.current = dictationRef.current?.textContent || "";
@@ -36,12 +54,21 @@ export function Dictation(props: IProps) {
         dictationRef.current?.textContent || ""
       );
       setDiffResult(diff);
+      // 默写正确
       if (diff.length === 1 && diff[0][0] === 0) {
+        // 但是目前没有被打对号，需要标记为正确
         if (!dictationCheckInputRef.current?.checked) {
           dictationCheckInputRef.current?.click();
+          updateCardRecordPath({
+            variables: {
+              cardID
+            }
+          })
         }
       }
+      // 默写错误
       else {
+        // 但是现在已经被打了对号，需要把标记清空
         if (dictationCheckInputRef.current?.checked) {
           dictationCheckInputRef.current?.click();
         }
@@ -62,15 +89,26 @@ export function Dictation(props: IProps) {
   return (
     <>
       <div className="dictation-check-container dark:shadow-dark-shadow w-[18px] h-[18px] mt-2 relative">
-        <input ref={dictationCheckInputRef} type="checkbox" className="hidden" />
-        <svg className="overflow-visible" viewBox="0 0 64 64" height="18px" width="18px">
+        <input
+          ref={dictationCheckInputRef}
+          type="checkbox"
+          className="hidden"
+        />
+        <svg
+          className="overflow-visible"
+          viewBox="0 0 64 64"
+          height="18px"
+          width="18px"
+        >
           <path
             d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
             pathLength="575.0541381835938"
             className="path"
           ></path>
         </svg>
-        <div className="absolute top-[50%] -translate-y-1/2 left-7 whitespace-nowrap text-gray text-[14px]">请在下面默写原文</div>
+        <div className="absolute top-[50%] -translate-y-1/2 left-7 whitespace-nowrap text-gray text-[14px]">
+          请在下面默写原文
+        </div>
       </div>
       <div className="relative">
         <div

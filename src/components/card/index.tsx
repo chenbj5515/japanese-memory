@@ -89,6 +89,24 @@ export function CardInHome(props: IProps) {
     text: "",
     id: "",
   });
+  const audioRef = React.useRef<any>();
+  const [insertCard] = useMutation(INSERT_CARD_MUTATION);
+  const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
+
+  React.useEffect(() => {
+    if (state === "closed") {
+      insertCard({
+        variables: {
+          content: text,
+          create_time: new Date(),
+          update_time: new Date(),
+          original_text: originalText,
+        },
+      }).then((res) => {
+        cardIDRef.current = res.data.insert_memo_card.returning[0].id;
+      });
+    }
+  }, [state]);
 
   React.useEffect(() => {
     callChatApi(originalText, {
@@ -119,25 +137,6 @@ export function CardInHome(props: IProps) {
       onerror() {},
     });
   }, []);
-
-  const audioRef = React.useRef<any>();
-  const [insertCard] = useMutation(INSERT_CARD_MUTATION);
-  const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
-
-  React.useEffect(() => {
-    if (state === "closed") {
-      insertCard({
-        variables: {
-          content: text,
-          create_time: new Date(),
-          update_time: new Date(),
-          original_text: originalText,
-        },
-      }).then((res) => {
-        cardIDRef.current = res.data.insert_memo_card.returning[0].id;
-      });
-    }
-  }, [state]);
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
@@ -260,6 +259,7 @@ export function CardInHome(props: IProps) {
           originalText={originalText}
           isFocused={isFocused}
           setIsFocused={setIsFocused}
+          cardID={cardIDRef.current}
         />
       </div>
     </div>
@@ -407,6 +407,7 @@ export function CardInHistory(props: IHistoryCardProps) {
           originalText={originalText}
           isFocused={isFocused}
           setIsFocused={setIsFocused}
+          cardID={cardID}
         />
       </div>
     </div>
