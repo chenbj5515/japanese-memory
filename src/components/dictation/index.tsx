@@ -53,6 +53,7 @@ export function Dictation(props: IProps) {
         originalText,
         dictationRef.current?.textContent || ""
       );
+      console.log(diff, "diff=======")
       setDiffResult(diff);
       // 默写正确
       if (diff.length === 1 && diff[0][0] === 0) {

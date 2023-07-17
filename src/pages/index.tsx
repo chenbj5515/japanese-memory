@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col dark:bg-bgDark bg-[#e8e8e8] overflow-scroll">
-      <header className="w-[100vw] p-[12px] z-10 justify-end items-center sticky top-0 flex">
+      <header className="w-[100vw] p-[12px] justify-end items-center sticky top-0 flex">
         <label className="text-base relative inline-block w-[56px] h-[28px]">
           <input
             onChange={handleToggle}
