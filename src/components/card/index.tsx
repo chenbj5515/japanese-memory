@@ -145,14 +145,15 @@ export function CardInHome(props: IProps) {
       const audioBlob = new Blob(recordedChunks, { type: "audio/acc" });
       const formData = new FormData();
       const timeStamp = new Date().getTime();
-      const recordFileName = `${cardID}${timeStamp}.acc`;
+      const recordFileName = `${cardID}${timeStamp}.mp3`;
       formData.append("audio", audioBlob, recordFileName);
       await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
       const audio = document.createElement("audio");
-      audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${timeStamp}.acc`;
+      audio.src = `http://localhost:8080/uploads/${recordFileName}`;
+      // audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${timeStamp}.acc`;
       audioRef.current = audio;
       await updateCardRecordPath({
         variables: {
@@ -290,14 +291,15 @@ export function CardInHistory(props: IHistoryCardProps) {
       const audioBlob = new Blob(recordedChunks, { type: "audio/acc" });
       const formData = new FormData();
       const timeStamp = new Date().getTime();
-      const recordFileName = `${cardID}${timeStamp}.acc`;
+      const recordFileName = `${cardID}${timeStamp}.mp3`;
       formData.append("audio", audioBlob, recordFileName);
       await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
       const audio = document.createElement("audio");
-      audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}${timeStamp}.acc`;
+      audio.src = `http://localhost:8080/uploads/${recordFileName}`;
+      // audio.src = `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_GOOGLE_CLOUD_BUKET}/${cardID}${timeStamp}.acc`;
       audioRef.current = audio;
       await updateCardRecordPath({
         variables: {
