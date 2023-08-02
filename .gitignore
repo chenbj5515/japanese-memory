@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 
+/public/uploads/*
+
 # testing
 /coverage
 
@@ -34,4 +36,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/uploads/*
