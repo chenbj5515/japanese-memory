@@ -1,12 +1,16 @@
 import React from "react";
 import { gql, useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
+import { useCookies } from "react-cookie";
 import { getRandomItemsFromArray } from "@/utils";
 import { CardInHistory, CardInHome } from "../card";
 
 const GET_CARD = gql`
-  query GetMemoCard {
-    memo_card {
+  query GetMemoCard($user_id: String!) {
+    memo_card(
+      where: { user_id: { _eq: $user_id } }
+    ) {
+      user_id
       content
       original_text
       record_file_path
@@ -74,7 +78,14 @@ function findShouldReviewDatas(data?: IMemoCard) {
 }
 
 export function CardList(props: IProps) {
-  const { loading, data } = useQuery<IMemoCard>(GET_CARD);
+  const [cookies] = useCookies(["user_id"]);
+
+  const { loading, data } = useQuery<IMemoCard>(GET_CARD, {
+    variables: {
+      user_id: cookies.user_id
+    }
+  });
+  console.log(data, "data========")
   const { type } = props;
   const shouldReviewDatas = findShouldReviewDatas(data);
   const { localCards } = useSelector((state: any) => state.localCardsSlice);

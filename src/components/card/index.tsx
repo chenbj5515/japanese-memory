@@ -1,6 +1,7 @@
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import { useRecorder } from "./hooks/use-recorder";
+import { useCookies } from "react-cookie";
 import { getTimeAgo, speakText, callChatApi } from "@/utils";
 import { Dictation } from "@/components";
 
@@ -25,6 +26,7 @@ const INSERT_CARD_MUTATION = gql`
     $create_time: timestamptz
     $update_time: timestamptz
     $original_text: String
+    $user_id: String
   ) {
     insert_memo_card(
       objects: {
@@ -32,6 +34,7 @@ const INSERT_CARD_MUTATION = gql`
         create_time: $create_time
         update_time: $update_time
         original_text: $original_text
+        user_id: $user_id
       }
     ) {
       affected_rows
@@ -41,6 +44,7 @@ const INSERT_CARD_MUTATION = gql`
         original_text
         create_time
         update_time
+        user_id
       }
     }
   }
@@ -89,6 +93,7 @@ export function CardInHome(props: IProps) {
     text: "",
     id: "",
   });
+  const [cookies] = useCookies(["user_id"]);
   const audioRef = React.useRef<any>();
   const [insertCard] = useMutation(INSERT_CARD_MUTATION);
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
@@ -101,6 +106,7 @@ export function CardInHome(props: IProps) {
           create_time: new Date(),
           update_time: new Date(),
           original_text: originalText,
+          user_id: cookies.user_id
         },
       }).then((res) => {
         cardIDRef.current = res.data.insert_memo_card.returning[0].id;

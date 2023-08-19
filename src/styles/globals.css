@@ -353,3 +353,35 @@ main,
   stroke-dasharray: 70.5096664428711 9999999;
   stroke-dashoffset: -262.2723388671875;
 }
+
+.welcome-bg {
+  background: url(https://img-sg.kee.so/assets/noise.svg),linear-gradient(#0040dc,#0040dc)
+}
+
+.input-welcome {
+  height: 44px;
+  background-color: white;
+  border-radius: .5rem;
+  padding: 0 1rem;
+  border: 2px solid transparent;
+  font-size: 1rem;
+  transition: border-color .3s cubic-bezier(.25,.01,.25,1) 0s, color .3s cubic-bezier(.25,.01,.25,1) 0s,background .2s cubic-bezier(.25,.01,.25,1) 0s;
+}
+
+.label-welcome {
+  display: block;
+  margin-bottom: .3rem;
+  font-size: .9rem;
+  font-weight: bold;
+  color: #05060f99;
+  transition: color .3s cubic-bezier(.25,.01,.25,1) 0s;
+}
+
+.input-welcome:hover, .input-welcome:focus, .input-group-welcome:hover .input-welcome {
+  outline: none;
+  border-color: #05060f;
+}
+
+.input-group-welcome:hover .label-welcome, .input-welcome:focus {
+  color: #05060fc2;
+}

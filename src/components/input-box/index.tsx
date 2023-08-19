@@ -41,7 +41,9 @@ export function InputBox() {
   }
 
   const handleKeyDown = (event: any) => {
-    if (event.key === "Enter") {
+    const content = editableRef.current.textContent;
+
+    if (event.key === "Enter" && content) {
       event.preventDefault();
       if (allowSendFlg) {
         handleSendBtnClick();
