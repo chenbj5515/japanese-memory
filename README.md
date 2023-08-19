@@ -26,7 +26,7 @@
 npm install 
 npm run dev
 ```
-### 本地服务器启动方式（录音文件用）
+### 本地录音文件服务器启动方式
 ```
 npm i http-server -g
 cd public
