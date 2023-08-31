@@ -20,6 +20,21 @@ const UPDATE_CARD_RECORD_PATH = gql`
   }
 `;
 
+const UPDATE_TEXT = gql`
+  mutation UpdateMemoCard(
+    $id: uuid!
+    $update_time: timestamptz
+    $content: String
+  ) {
+    update_memo_card_by_pk(
+      pk_columns: { id: $id }
+      _set: { update_time: $update_time, content: $content }
+    ) {
+      id
+    }
+  }
+`;
+
 const INSERT_CARD_MUTATION = gql`
   mutation InsertMemoCard(
     $content: String
@@ -106,7 +121,7 @@ export function CardInHome(props: IProps) {
           create_time: new Date(),
           update_time: new Date(),
           original_text: originalText,
-          user_id: cookies.user_id
+          user_id: cookies.user_id,
         },
       }).then((res) => {
         cardIDRef.current = res.data.insert_memo_card.returning[0].id;
@@ -288,8 +303,11 @@ export function CardInHistory(props: IHistoryCardProps) {
   const { text, originalText, recorderPath, createTime, cardID } = props;
   const audioRef = React.useRef<any>();
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
+  const [updateText] = useMutation(UPDATE_TEXT);
   const [recorderLoading, setRecordedLoading] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
+  const contentTextRef = React.useRef<any>(null);
+  const [cookies] = useCookies(["user_id"]);
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
@@ -344,6 +362,23 @@ export function CardInHistory(props: IHistoryCardProps) {
     audioRef.current?.play();
   }
 
+  function handleBlur() {
+    updateText({
+      variables: {
+        content: contentTextRef.current?.textContent,
+        update_time: new Date(),
+        id: cardID,
+      },
+    });
+  }
+
+  React.useEffect(() => {
+    const textEle = contentTextRef.current;
+    if (textEle) {
+      textEle.textContent = text;
+    }
+  }, [text]);
+
   return (
     <div className="card dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
@@ -370,14 +405,21 @@ export function CardInHistory(props: IHistoryCardProps) {
         </svg>
       </div>
       <div className="mb-[28px] relative w-calc100-42">
-        <section
-          className={`rounded-lg absolute ${
-            isFocused ? "glass" : ""
-          }  w-[101%] h-[105%] -left-[4px] -top-[2px]`}
-        ></section>
+        {isFocused ? (
+          <section
+            className={`rounded-lg absolute ${
+              isFocused ? "glass" : ""
+            }  w-[101%] h-[105%] -left-[4px] -top-[2px]`}
+          ></section>
+        ) : null}
         原文：{originalText}
       </div>
-      <div className="whitespace-pre-wrap pr-[42px]">{text}</div>
+      <div
+        contentEditable
+        ref={contentTextRef}
+        onBlur={handleBlur}
+        className="whitespace-pre-wrap pr-[42px] outline-none"
+      ></div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
         {/* 录音按钮 */}
         <div className="toggle w-[40px] h-[40px] mr-[30px]">
