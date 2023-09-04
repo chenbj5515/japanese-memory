@@ -188,6 +188,7 @@ export function CardInHome(props: IProps) {
   });
 
   function handlePlayBtn() {
+    console.log(cardIDRef.current)
     speakText(originalText, {
       voicerName: "ja-JP-NanamiNeural",
     });
@@ -343,6 +344,7 @@ export function CardInHistory(props: IHistoryCardProps) {
   }, []);
 
   function handlePlayBtn() {
+    console.log(cardID)
     speakText(originalText, {
       voicerName: "ja-JP-NanamiNeural",
     });

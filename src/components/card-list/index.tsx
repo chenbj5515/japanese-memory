@@ -85,7 +85,6 @@ export function CardList(props: IProps) {
       user_id: cookies.user_id
     }
   });
-  console.log(data, "data========")
   const { type } = props;
   const shouldReviewDatas = findShouldReviewDatas(data);
   const { localCards } = useSelector((state: any) => state.localCardsSlice);
