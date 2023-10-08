@@ -149,7 +149,7 @@ export function Welcome() {
         <div className="text-white font-NewYork text-[30px] mt-[50px]">
           Welcome, type your username
         </div>
-        <div className="input-group-welcome relative w-[330px] flex mt-[40px]">
+        <div className="input-group-welcome relative w-[330px] max-w-[100%] flex mt-[40px]">
           <input
             onKeyDown={handleKeyDown}
             value={value}
@@ -158,7 +158,7 @@ export function Welcome() {
             autoComplete="off"
             name="Email"
             id="Email"
-            className="input-welcome bg-white"
+            className="input-welcome max-w-[58%] bg-white"
             type="email"
           />
           <div
