@@ -1,8 +1,46 @@
 "use client";
 import React from "react";
+import { useDispatch } from "react-redux";
 import { useCookies } from "react-cookie";
+import LiveIsland from "react-live-island";
+
 import "remixicon/fonts/remixicon.css";
-import { InputBox, CardList, Welcome } from "../components";
+import { InputBox, CardList, Welcome, Dictation } from "../components";
+import { changeFilterFuc } from "@/components/card-list/history-lists-slice";
+
+interface ICard {
+  content: string;
+  record_file_path: string;
+  create_time: string;
+  update_time: string;
+  id: string;
+  original_text: string;
+  review_times: number;
+}
+
+interface IMemoCard {
+  memo_card: ICard[];
+}
+
+function findLatestUnReview(data?: IMemoCard) {
+  const resultList = [];
+  const prevList = data?.memo_card || [];
+  const sorted =  [...prevList].sort(
+    (a, b) =>
+      new Date(b.create_time).getTime() - new Date(a.create_time).getTime()
+  );
+  console.log(sorted.slice(0, 30), "data===")
+  for (const item of sorted) {
+    const { review_times } = item;
+    if (review_times === 0) {
+      resultList.push(item);
+    }
+    if (resultList.length === 20) {
+      return resultList;
+    }
+  }
+  return resultList;
+}
 
 export default function Home() {
   const [theme, setTheme] = React.useState("light");
@@ -20,6 +58,7 @@ export default function Home() {
     }
     document.body.classList.toggle("dark");
   }
+  const dispatch = useDispatch();
 
   if (mounted && cookies.user_id === undefined) {
     return <Welcome />;
@@ -28,6 +67,41 @@ export default function Home() {
   return (
     mounted && (
       <main className="flex flex-col dark:bg-bgDark bg-[#e8e8e8] overflow-scroll">
+        <LiveIsland
+          className="flex justify-center items-center uppercase"
+          smallClassName="text-xs"
+          largeClassName="text-7xl"
+          initialAnimation
+        >
+          {(isSmall) =>
+            isSmall ? (
+              ""
+            ) : (
+              <div className="flex space-x-2 p-4">
+                <div
+                  className="bg-blue-500 text-white text-center p-2 rounded-lg text-sm cursor-pointer"
+                  style={{ width: "120px" }}
+                >
+                  earliest 20
+                </div>
+                <div
+                  className="bg-green-500 text-white text-center p-2 rounded-lg text-sm cursor-pointer"
+                  style={{ width: "120px" }}
+                  onClick={() => {
+                    console.log("23232", changeFilterFuc);
+                    dispatch(
+                      changeFilterFuc({
+                        filterFuc: findLatestUnReview,
+                      })
+                    );
+                  }}
+                >
+                  latest 20
+                </div>
+              </div>
+            )
+          }
+        </LiveIsland>
         <header className="w-[100vw] p-[12px] justify-end items-center top-0 flex">
           <label className="text-base relative inline-block w-[56px] h-[28px]">
             <input
