@@ -103,7 +103,7 @@ export function CardList(props: IProps) {
   const { historyLists } = useSelector((state: any) => state.historyListsSlice);
 
   React.useEffect(() => {
-    if (!historyLists && data) {
+    if (!historyLists.length && data) {
       dispatch(
         updateHistoryLists({
           historyLists: findShouldReviewDatas(data),
