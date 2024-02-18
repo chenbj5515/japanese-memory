@@ -1,6 +1,6 @@
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
-import { useRecorder } from "./hooks/use-recorder";
+import { useRecorder, useShareCardID } from "./hooks";
 import { useCookies } from "react-cookie";
 import { getTimeAgo, speakText, callChatApi } from "@/utils";
 import { Dictation } from "@/components";
@@ -112,6 +112,7 @@ export function CardInHome(props: IProps) {
   const audioRef = React.useRef<any>();
   const [insertCard] = useMutation(INSERT_CARD_MUTATION);
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
+  const cardRef = React.useRef(null);
 
   React.useEffect(() => {
     if (state === "closed") {
@@ -211,7 +212,7 @@ export function CardInHome(props: IProps) {
   }
 
   return (
-    <div className="card dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
+    <div ref={cardRef} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         刚刚
       </div>
@@ -296,19 +297,21 @@ interface IHistoryCardProps {
   recorderPath: string;
   createTime: string;
   cardID: string;
+  forwardRef?: any;
 }
 
 export function CardInHistory(props: IHistoryCardProps) {
   const [recorderPressed, setRecorderPressedState] = React.useState(false);
   const [recordPlayBtnPressed, setRecordPlayBtnPressed] = React.useState(false);
-  const { text, originalText, recorderPath, createTime, cardID } = props;
+  const { text, originalText, recorderPath, createTime, cardID, forwardRef } = props;
   const audioRef = React.useRef<any>();
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
   const [updateText] = useMutation(UPDATE_TEXT);
   const [recorderLoading, setRecordedLoading] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
   const contentTextRef = React.useRef<any>(null);
-  const [cookies] = useCookies(["user_id"]);
+  const cardRef = React.useRef(forwardRef);
+  useShareCardID(forwardRef ?? cardRef, cardID);
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
@@ -383,7 +386,7 @@ export function CardInHistory(props: IHistoryCardProps) {
   }, [text]);
 
   return (
-    <div className="card dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
+    <div ref={forwardRef ?? cardRef} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         {getTimeAgo(createTime)}
       </div>
@@ -421,7 +424,7 @@ export function CardInHistory(props: IHistoryCardProps) {
         contentEditable
         ref={contentTextRef}
         onBlur={handleBlur}
-        className="whitespace-pre-wrap pr-[42px] outline-none"
+        className="whitespace-pre-wrap pr-[42px] outline-none leading-[3]"
       ></div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
         {/* 录音按钮 */}

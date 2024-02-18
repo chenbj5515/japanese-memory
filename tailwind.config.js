@@ -26,7 +26,8 @@ module.exports = {
       boxShadow: {
         'crescent': 'inset 8px -4px 0px 0px #fff000',
         'full-moon': 'inset 15px -4px 0px 15px #fff000',
-        'dark-shadow': '0px 0px 10px 1px #000000ee'
+        'dark-shadow': '0px 0px 10px 1px #000000ee',
+        'little-button': '0.1em 0.1em',
       },
     },
   },

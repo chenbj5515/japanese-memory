@@ -32,10 +32,41 @@ main,
 }
 
 .card {
-  border-radius: 20px;
   background: #e8e8e8;
   box-shadow: 5px 5px 6px #dadada, -5px -5px 6px #f6f6f6;
   transition: 0.4s;
+}
+
+.word-card {
+  width: 210px;
+  font-family: "Arial";
+  padding: 1rem;
+  background: #f1f1f3;
+  box-shadow: 5px 5px 6px #dadada, -5px -5px 6px #f6f6f6;
+  position: relative;
+}
+
+.btn2 {
+  margin-top: 10px;
+  width: 80px;
+  font-family: inherit;
+  padding: 0.3em 0.7em;
+  font-weight: 900;
+  font-size: 14px;
+  border: 1px solid black;
+  border-radius: 0.4em;
+  box-shadow: 0.1em 0.1em;
+  cursor: pointer;
+}
+
+.btn2:hover {
+  transform: translate(-0.02em, -0.02em);
+  box-shadow: 0.1em 0.1em;
+}
+
+.btn2:active {
+  transform: translate(0.02em, 0.02em);
+  box-shadow: 0.02em 0.02em;
 }
 
 .card-title {
@@ -334,6 +365,16 @@ main,
   backdrop-filter: saturate(180%) blur(3px);
 }
 
+/* 特定元素hover时取消毛玻璃效果 */
+.unique-glass:hover {
+  backdrop-filter: none;
+  background: rgba(255, 255, 255, 0);
+}
+
+.center {
+  transform: translate(-50%, -50%);
+}
+
 .w-calc100-42 {
   width: calc(100% - 42px);
 }
@@ -355,33 +396,39 @@ main,
 }
 
 .welcome-bg {
-  background: url(https://img-sg.kee.so/assets/noise.svg),linear-gradient(#0040dc,#0040dc)
+  background: url(https://img-sg.kee.so/assets/noise.svg),
+    linear-gradient(#0040dc, #0040dc);
 }
 
 .input-welcome {
   height: 44px;
   background-color: white;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   padding: 0 1rem;
   border: 2px solid transparent;
   font-size: 1rem;
-  transition: border-color .3s cubic-bezier(.25,.01,.25,1) 0s, color .3s cubic-bezier(.25,.01,.25,1) 0s,background .2s cubic-bezier(.25,.01,.25,1) 0s;
+  transition: border-color 0.3s cubic-bezier(0.25, 0.01, 0.25, 1) 0s,
+    color 0.3s cubic-bezier(0.25, 0.01, 0.25, 1) 0s,
+    background 0.2s cubic-bezier(0.25, 0.01, 0.25, 1) 0s;
 }
 
 .label-welcome {
   display: block;
-  margin-bottom: .3rem;
-  font-size: .9rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
   font-weight: bold;
   color: #05060f99;
-  transition: color .3s cubic-bezier(.25,.01,.25,1) 0s;
+  transition: color 0.3s cubic-bezier(0.25, 0.01, 0.25, 1) 0s;
 }
 
-.input-welcome:hover, .input-welcome:focus, .input-group-welcome:hover .input-welcome {
+.input-welcome:hover,
+.input-welcome:focus,
+.input-group-welcome:hover .input-welcome {
   outline: none;
   border-color: #05060f;
 }
 
-.input-group-welcome:hover .label-welcome, .input-welcome:focus {
+.input-group-welcome:hover .label-welcome,
+.input-welcome:focus {
   color: #05060fc2;
 }
