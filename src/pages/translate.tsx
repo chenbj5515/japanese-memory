@@ -62,8 +62,8 @@ export default function Translate() {
 
   console.log(data && findShouldReviewTranslateDatas(data), "data===")
   return (
-    data?.memo_card?.map(item => (
-        <div className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
+    data?.memo_card?.map((item, index) => (
+        <div key={index} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
             {/* {item.}     */}
         </div>
     ))
