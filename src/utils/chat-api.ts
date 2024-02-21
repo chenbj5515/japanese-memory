@@ -7,7 +7,7 @@ const headers = {
   Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
 };
 const data = {
-  model: "gpt-3.5-turbo-0301",
+  model: "gpt-3.5-turbo-0613",
   max_tokens: +process.env.NEXT_PUBLIC_OPENAI_API_KEY!,
   stream: true,
 };

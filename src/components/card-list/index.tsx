@@ -1,16 +1,10 @@
 import React from "react";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import { useSelector, useDispatch } from "react-redux";
 import { updateHistoryLists } from "../card-list/history-lists-slice";
 import { useCookies } from "react-cookie";
-import { getRandomItemsFromArray } from "@/utils";
+import { findShouldReviewDatas, callChatApi } from "@/utils";
 import { CardInHistory, CardInHome } from "../card";
-
-const SEVEN_MINS_AGO = 7 * 60 * 1000;
-const EIGHT_HOURS_AGO = 8 * 60 * 60 * 1000;
-const TWO_DAYS_AGO = 2 * 24 * 60 * 60 * 1000;
-const TWO_WEEKS_AGO = 2 * 7 * 24 * 60 * 60 * 1000;
-const TWO_MONTHS_AGO = 2 * 30 * 24 * 60 * 60 * 1000;
 
 interface ICard {
   content: string;
@@ -30,13 +24,34 @@ const GET_CARD = gql`
   query GetMemoCard($user_id: String!) {
     memo_card(where: { user_id: { _eq: $user_id } }) {
       user_id
-      content
+      translation
+      kana_pronunciation
       original_text
       record_file_path
       create_time
       update_time
       id
       review_times
+    }
+  }
+`;
+
+const UPDATE_TRANSLATION_AND_KANA = gql`
+  mutation UpdateMemoCard(
+    $id: uuid!
+    $translation: String
+    $kana_pronunciation: String
+  ) {
+    update_memo_card_by_pk(
+      pk_columns: { id: $id }
+      _set: {
+        translation: $translation
+        kana_pronunciation: $kana_pronunciation
+      }
+    ) {
+      id
+      translation
+      kana_pronunciation
     }
   }
 `;
@@ -59,37 +74,6 @@ interface IProps {
   type: "history" | "local";
 }
 
-function findShouldReviewDatas(data?: IMemoCard) {
-  const resultList = [];
-  for (const item of data?.memo_card || []) {
-    const { create_time, review_times } = item;
-    const timediff = new Date().getTime() - new Date(create_time).getTime();
-    let needReviewTimes = 0;
-    if (timediff > SEVEN_MINS_AGO) {
-      needReviewTimes = 1;
-    }
-    if (timediff > EIGHT_HOURS_AGO) {
-      needReviewTimes = 2;
-    }
-    if (timediff > TWO_DAYS_AGO) {
-      needReviewTimes = 3;
-    }
-    if (timediff > TWO_WEEKS_AGO) {
-      needReviewTimes = 4;
-    }
-    if (timediff > TWO_MONTHS_AGO) {
-      needReviewTimes = 5;
-    }
-    if (review_times < needReviewTimes) {
-      resultList.push({
-        ...item,
-        needReviewTimes,
-      });
-    }
-  }
-  return getRandomItemsFromArray(resultList);
-}
-
 export function CardList(props: IProps) {
   const [cookies] = useCookies(["user_id"]);
   const dispatch = useDispatch();
@@ -99,6 +83,69 @@ export function CardList(props: IProps) {
       user_id: cookies.user_id,
     },
   });
+
+  const [update] = useMutation(UPDATE_TRANSLATION_AND_KANA);
+
+  function promisefy(original_text: string, prompt: string) {
+    let tanslation = "";
+    return new Promise((resolve, reject) => {
+      console.log("call=====");
+      callChatApi(original_text, {
+        onmessage(event: any) {
+          if (event.data === "[DONE]") {
+            return;
+          }
+          const parsedData = JSON.parse(event.data);
+          const curText =
+            parsedData.choices
+              ?.map((choice: any) => {
+                if (choice.delta) {
+                  return choice.delta.content;
+                }
+                return "";
+              })
+              ?.join("") || "";
+          tanslation += curText;
+        },
+        async onclose() {
+          resolve(tanslation);
+        },
+        onerror(err: any) {
+          console.log(err, "err====");
+        },
+        prompt,
+      });
+    });
+  }
+
+  // async function handleClick() {
+  //   if (data) {
+  //     for (let { id, original_text } of data.memo_card) {
+  //       try {
+  //         const p1 = promisefy(original_text, "对我给出的日文，给出中文翻译");
+  //         const p2 = promisefy(
+  //           original_text,
+  //           "对我给出的日文，给出假名形式的读音标记"
+  //         );
+  //         const res = await Promise.all([p1, p2]);
+  //         await update({
+  //           variables: {
+  //             id,
+  //             translation: res[0],
+  //             kana_pronunciation: res[1],
+  //           },
+  //         });
+  //         console.log(res, "res======");
+  //         // 在这里处理 res
+  //       } catch (error) {
+  //         console.error("处理 memo card 时出错：", error);
+  //         // 根据需要处理错误
+  //       }
+  //     }
+  //   }
+  // }
+
+  // console.log(data, "data====");
 
   const { historyLists } = useSelector((state: any) => state.historyListsSlice);
 
@@ -135,7 +182,8 @@ export function CardList(props: IProps) {
       <>
         {historyLists.map(
           ({
-            content,
+            translation,
+            kana_pronunciation,
             original_text,
             record_file_path,
             create_time,
@@ -143,7 +191,8 @@ export function CardList(props: IProps) {
           }: any) => (
             <CardInHistory
               key={id}
-              text={content}
+              translation={translation}
+              kanaPronunciation={kana_pronunciation}
               originalText={original_text}
               recorderPath={record_file_path}
               createTime={create_time}
@@ -157,8 +206,8 @@ export function CardList(props: IProps) {
 
   return (
     <>
-      {localCards?.map(({ originalText, id }: any) => (
-        <CardInHome key={id} originalText={originalText} />
+      {localCards?.map(({ original_text, id }: any) => (
+        <CardInHome key={id} originalText={original_text} />
       ))}
     </>
   );

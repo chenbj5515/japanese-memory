@@ -20,15 +20,30 @@ const UPDATE_CARD_RECORD_PATH = gql`
   }
 `;
 
-const UPDATE_TEXT = gql`
+const UPDATE_TRANSLATION = gql`
   mutation UpdateMemoCard(
     $id: uuid!
     $update_time: timestamptz
-    $content: String
+    $translation: String
   ) {
     update_memo_card_by_pk(
       pk_columns: { id: $id }
-      _set: { update_time: $update_time, content: $content }
+      _set: { update_time: $update_time, translation: $translation }
+    ) {
+      id
+    }
+  }
+`;
+
+const UPDATE_KANA = gql`
+  mutation UpdateMemoCard(
+    $id: uuid!
+    $update_time: timestamptz
+    $kana_pronunciation: String
+  ) {
+    update_memo_card_by_pk(
+      pk_columns: { id: $id }
+      _set: { update_time: $update_time, kana_pronunciation: $kana_pronunciation }
     ) {
       id
     }
@@ -37,7 +52,8 @@ const UPDATE_TEXT = gql`
 
 const INSERT_CARD_MUTATION = gql`
   mutation InsertMemoCard(
-    $content: String
+    $translation: String
+    $kana_pronunciation: String
     $create_time: timestamptz
     $update_time: timestamptz
     $original_text: String
@@ -45,7 +61,8 @@ const INSERT_CARD_MUTATION = gql`
   ) {
     insert_memo_card(
       objects: {
-        content: $content
+        translation: $translation
+        kana_pronunciation: $kana_pronunciation
         create_time: $create_time
         update_time: $update_time
         original_text: $original_text
@@ -55,7 +72,8 @@ const INSERT_CARD_MUTATION = gql`
       affected_rows
       returning {
         id
-        content
+        translation
+        kana_pronunciation
         original_text
         create_time
         update_time
@@ -70,25 +88,32 @@ interface IProps {
 }
 
 interface IState {
-  text: string;
+  tanslation: string;
+  kana: string;
   state: string;
   id: string;
 }
 
 type Action =
   | {
-      type: "updateTextStream";
-      text: string;
+      type: "updateTranslationStream";
+      tanslation: string;
     }
   | {
       type: "updateState";
       state: string;
+    }
+  | {
+      type: "updateKanaStream";
+      kana: string;
     };
 
 const reducer = (state: IState, action: Action): IState => {
   switch (action.type) {
-    case "updateTextStream":
-      return { ...state, text: state.text + action.text };
+    case "updateTranslationStream":
+      return { ...state, tanslation: state.tanslation + action.tanslation };
+    case "updateKanaStream":
+      return { ...state, kana: state.kana + action.kana };
     case "updateState":
       return { ...state, state: action.state };
     default:
@@ -103,11 +128,9 @@ export function CardInHome(props: IProps) {
   const { originalText } = props;
   const [recorderLoading, setRecordedLoading] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
-  const [{ state, text }, dispatch] = React.useReducer(reducer, {
-    state: "initial",
-    text: "",
-    id: "",
-  });
+  const tanslationRef = React.useRef("");
+  const kanaRef = React.useRef("");
+
   const [cookies] = useCookies(["user_id"]);
   const audioRef = React.useRef<any>();
   const [insertCard] = useMutation(INSERT_CARD_MUTATION);
@@ -115,10 +138,13 @@ export function CardInHome(props: IProps) {
   const cardRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (state === "closed") {
+    let translateDone = false,
+      kanaDone = false;
+    function handleAllDone() {
       insertCard({
         variables: {
-          content: text,
+          translation: tanslationRef.current,
+          kana_pronunciation: kanaRef.current,
           create_time: new Date(),
           update_time: new Date(),
           original_text: originalText,
@@ -128,9 +154,6 @@ export function CardInHome(props: IProps) {
         cardIDRef.current = res.data.insert_memo_card.returning[0].id;
       });
     }
-  }, [state]);
-
-  React.useEffect(() => {
     callChatApi(originalText, {
       onmessage(event: any) {
         if (event.data === "[DONE]") {
@@ -145,18 +168,58 @@ export function CardInHome(props: IProps) {
             return "";
           })
           .join("");
-        dispatch({
-          type: "updateTextStream",
-          text: curText,
-        });
+        tanslationRef.current += curText;
+        // dispatch({
+        //   type: "updateTranslationStream",
+        //   tanslation: curText,
+        // });
       },
       async onclose() {
-        dispatch({
-          type: "updateState",
-          state: "closed",
-        });
+        translateDone = true;
+        if (translateDone && kanaDone) {
+          handleAllDone();
+        }
+        // dispatch({
+        //   type: "updateState",
+        //   state: "closed",
+        // });
       },
       onerror() {},
+      prompt: "对我给出的日文，给出中文翻译",
+    });
+    callChatApi(originalText, {
+      onmessage(event: any) {
+        if (event.data === "[DONE]") {
+          return;
+        }
+        const parsedData = JSON.parse(event.data);
+        const curText = parsedData.choices
+          .map((choice: any) => {
+            if (choice.delta) {
+              return choice.delta.content;
+            }
+            return "";
+          })
+          .join("");
+        kanaRef.current += curText;
+
+        // dispatch({
+        //   type: "updateKanaStream",
+        //   kana: curText,
+        // });
+      },
+      async onclose() {
+        kanaDone = true;
+        if (translateDone && kanaDone) {
+          handleAllDone();
+        }
+        // dispatch({
+        //   type: "updateState",
+        //   state: "closed",
+        // });
+      },
+      onerror() {},
+      prompt: "对我给出的日文，给出假名形式的读音标记",
     });
   }, []);
 
@@ -189,7 +252,7 @@ export function CardInHome(props: IProps) {
   });
 
   function handlePlayBtn() {
-    console.log(cardIDRef.current)
+    console.log(cardIDRef.current);
     speakText(originalText, {
       voicerName: "ja-JP-NanamiNeural",
     });
@@ -212,7 +275,10 @@ export function CardInHome(props: IProps) {
   }
 
   return (
-    <div ref={cardRef} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
+    <div
+      ref={cardRef}
+      className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative"
+    >
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         刚刚
       </div>
@@ -244,7 +310,8 @@ export function CardInHome(props: IProps) {
         ></section>
         原文：{originalText}
       </div>
-      <div className="whitespace-pre-wrap pr-[42px]">{text}</div>
+      中文翻译：<div className="whitespace-pre-wrap pr-[42px]">{tanslationRef.current}</div>
+      假名标记：<div className="whitespace-pre-wrap pr-[42px]">{kanaRef.current}</div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
         {/* 录音按钮 */}
         <div className="toggle w-[40px] h-[40px] mr-[30px]">
@@ -292,7 +359,8 @@ export function CardInHome(props: IProps) {
 }
 
 interface IHistoryCardProps {
-  text: string;
+  translation: string;
+  kanaPronunciation: string;
   originalText: string;
   recorderPath: string;
   createTime: string;
@@ -303,13 +371,16 @@ interface IHistoryCardProps {
 export function CardInHistory(props: IHistoryCardProps) {
   const [recorderPressed, setRecorderPressedState] = React.useState(false);
   const [recordPlayBtnPressed, setRecordPlayBtnPressed] = React.useState(false);
-  const { text, originalText, recorderPath, createTime, cardID, forwardRef } = props;
+  const { translation, kanaPronunciation, originalText, recorderPath, createTime, cardID, forwardRef } =
+    props;
   const audioRef = React.useRef<any>();
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
-  const [updateText] = useMutation(UPDATE_TEXT);
+  const [updateTranslation] = useMutation(UPDATE_TRANSLATION);
+  const [updateKana] = useMutation(UPDATE_KANA);
   const [recorderLoading, setRecordedLoading] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
-  const contentTextRef = React.useRef<any>(null);
+  const translationTextRef = React.useRef<any>(null);
+  const kanaTextRef = React.useRef<any>(null);
   const cardRef = React.useRef(forwardRef);
   useShareCardID(forwardRef ?? cardRef, cardID);
 
@@ -348,7 +419,7 @@ export function CardInHistory(props: IHistoryCardProps) {
   }, []);
 
   function handlePlayBtn() {
-    console.log(cardID)
+    console.log(cardID);
     speakText(originalText, {
       voicerName: "ja-JP-NanamiNeural",
     });
@@ -369,9 +440,19 @@ export function CardInHistory(props: IHistoryCardProps) {
   }
 
   function handleBlur() {
-    updateText({
+    updateTranslation({
       variables: {
-        content: contentTextRef.current?.textContent,
+        translation: translationTextRef.current?.textContent,
+        update_time: new Date(),
+        id: cardID,
+      },
+    });
+  }
+
+  function handleKanaBlur() {
+    updateKana({
+      variables: {
+        kana_pronunciation: kanaTextRef.current?.textContent,
         update_time: new Date(),
         id: cardID,
       },
@@ -379,14 +460,24 @@ export function CardInHistory(props: IHistoryCardProps) {
   }
 
   React.useEffect(() => {
-    const textEle = contentTextRef.current;
+    const textEle = translationTextRef.current;
     if (textEle) {
-      textEle.textContent = text;
+      textEle.textContent = translation;
     }
-  }, [text]);
+  }, [translation]);
+
+  React.useEffect(() => {
+    const textEle = kanaTextRef.current;
+    if (textEle) {
+      textEle.textContent = kanaPronunciation;
+    }
+  }, [kanaPronunciation]);
 
   return (
-    <div ref={forwardRef ?? cardRef} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
+    <div
+      ref={forwardRef ?? cardRef}
+      className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative"
+    >
       <div className="text-[14px] absolute -top-[30px] left-1 text-[gray]">
         {getTimeAgo(createTime)}
       </div>
@@ -420,10 +511,16 @@ export function CardInHistory(props: IHistoryCardProps) {
         ) : null}
         原文：{originalText}
       </div>
-      <div
+      中文翻译：<div
         contentEditable
-        ref={contentTextRef}
+        ref={translationTextRef}
         onBlur={handleBlur}
+        className="whitespace-pre-wrap pr-[42px] outline-none leading-[3]"
+      ></div>
+      读音标记：<div
+        contentEditable
+        ref={kanaTextRef}
+        onBlur={handleKanaBlur}
         className="whitespace-pre-wrap pr-[42px] outline-none leading-[3]"
       ></div>
       <div className="flex justify-center mt-3 relative cursor-pointer">
@@ -438,7 +535,6 @@ export function CardInHistory(props: IHistoryCardProps) {
           />
           <span className="button dark:shadow-none dark:bg-bgDark w-[50px] h-[50px] -translate-x-1/2 -translate-y-1/2"></span>
         </div>
-
         {/* 录音播放按钮 */}
         <div className="toggle w-[40px] h-[40px]">
           {/* 录音按钮更新中的loading */}

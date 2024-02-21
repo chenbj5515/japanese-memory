@@ -1,7 +1,7 @@
 import React from "react";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useCookies } from "react-cookie";
-import { getTimeAgo, speakText, callChatApi } from "@/utils";
+import { getTimeAgo, speakText } from "@/utils";
 import { CardInHistory } from "@/components/card";
 
 const GET_WORD_CARD = gql`
@@ -20,7 +20,8 @@ const GET_WORD_CARD = gql`
       memo_card_id
       memo_card {
         id
-        content
+        kana_pronunciation
+        translation
         create_time
         record_file_path
         original_text
@@ -68,7 +69,7 @@ export default function WordCardList() {
   });
 
   const [
-    { content, original_text, record_file_path, create_time, id },
+    { translation, kana_pronunciation, original_text, record_file_path, create_time, id },
     setForgottenCardInfo,
   ] = React.useState<any>({});
 
@@ -136,7 +137,8 @@ export default function WordCardList() {
         <div className="fixed w-full h-full glass overflow-scroll z-[10000]">
           <div className="absolute left-[50%] top-[50%] center">
             <CardInHistory
-              text={content}
+              translation={translation}
+              kanaPronunciation={kana_pronunciation}
               originalText={original_text}
               recorderPath={record_file_path}
               createTime={create_time}

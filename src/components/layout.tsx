@@ -24,7 +24,8 @@ export function Layout({ children }: any) {
             limit: 20
           ) {
             user_id
-            content
+            translation
+            kana_pronunciation
             original_text
             record_file_path
             create_time
@@ -60,6 +61,10 @@ export function Layout({ children }: any) {
     document.body.classList.toggle("dark");
   }
 
+  function handleTranslateCLick() {
+    router.push("/translate");
+  }
+
   return (
     <main className="flex flex-col dark:bg-bgDark bg-[#e8e8e8] overflow-scroll">
       <LiveIsland
@@ -90,6 +95,12 @@ export function Layout({ children }: any) {
               >
                 <div>Word</div>
                 <div className="mt-2">Cards</div>
+              </div>
+              <div
+                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-sm cursor-pointer"
+                onClick={handleTranslateCLick}
+              >
+                <div>translate</div>
               </div>
             </div>
           )
