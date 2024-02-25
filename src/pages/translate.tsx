@@ -1,8 +1,8 @@
 import React from "react";
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { useCookies } from "react-cookie";
-import { getTimeAgo, speakText, callChatApi } from "@/utils";
-import { findShouldReviewTranslateDatas } from "@/utils";
+import { Dictation } from "@/components";
+import { findShouldReviewDatas } from "@/utils";
 
 const GET_WORD_CARD = gql`
   query GetMemoCard($user_id: String!) {
@@ -23,7 +23,8 @@ const GET_WORD_CARD = gql`
 `;
 
 interface ICard {
-  content: string;
+  translation: string;
+  kana_pronunciation: string;
   record_file_path: string;
   create_time: string;
   update_time: string;
@@ -60,11 +61,14 @@ export default function Translate() {
     );
   }
 
-  console.log(data && findShouldReviewTranslateDatas(data), "data===")
   return (
-    data?.memo_card?.map((item, index) => (
-        <div key={index} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 width-92-675 mx-auto mt-10 relative">
-            {/* {item.}     */}
+    findShouldReviewDatas(data?.memo_card || [], "translation")?.map((item, index) => (
+        <div key={index} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 w-[675px] width-92-675 mx-auto mt-10 relative">
+            {item.translation}
+            <Dictation
+              originalText={item.original_text}
+              cardID={item.id}
+            />
         </div>
     ))
   );

@@ -4,8 +4,9 @@ import diff_match_patch from "diff-match-patch";
 
 interface IProps {
   originalText: string;
-  isFocused: boolean;
-  setIsFocused: React.Dispatch<React.SetStateAction<boolean>>;
+  onBlurChange?: (state: string) => void;
+  // isFocused: boolean;
+  // setIsFocused: React.Dispatch<React.SetStateAction<boolean>>;
   cardID: string;
 }
 
@@ -25,19 +26,21 @@ const UPDATE_REVIEW_TIMES = gql`
 `;
 
 export function Dictation(props: IProps) {
-  const { originalText, isFocused, setIsFocused, cardID } = props;
+  const { originalText, cardID, onBlurChange } = props;
   const dictationRef = React.useRef<HTMLDivElement>(null);
   const [diffResult, setDiffResult] = React.useState([]);
   const inputContentRef = React.useRef("");
   const dictationCheckInputRef = React.useRef<HTMLInputElement>(null);
   const firstRender = React.useRef(true);
   const [updateCardRecordPath] = useMutation(UPDATE_REVIEW_TIMES);
+  const [isFocused, setIsFocused] = React.useState(false);
 
   function handleDictationChange() {
     inputContentRef.current = dictationRef.current?.textContent || "";
   }
 
   React.useEffect(() => {
+    onBlurChange?.(isFocused ? "focus" : "blur")
     if (firstRender.current) {
       firstRender.current = false;
       return;
@@ -104,6 +107,7 @@ export function Dictation(props: IProps) {
           <path
             d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
             pathLength="575.0541381835938"
+            stroke="grey"
             className="path"
           ></path>
         </svg>

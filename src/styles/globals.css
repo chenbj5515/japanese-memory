@@ -32,7 +32,7 @@ main,
 }
 
 .card {
-  background: #e8e8e8;
+  background: #fff;
   box-shadow: 5px 5px 6px #dadada, -5px -5px 6px #f6f6f6;
   transition: 0.4s;
 }
@@ -159,7 +159,7 @@ main,
     inset 0 5px 8px 0 rgba(255, 255, 255, 0.1);
   border-radius: 68.8px;
   position: absolute;
-  background: #eaeaea;
+  background: #fff;
   display: block;
   left: 50%;
   top: 50%;
@@ -344,7 +344,7 @@ main,
 .dictation-input {
   border-radius: 15px;
   padding: 8px;
-  background-color: #e8e8e8;
+  background-color: #fff;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2),
     -2px -2px 8px rgba(255, 255, 255, 0.7);
 }

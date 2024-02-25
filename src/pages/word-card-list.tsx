@@ -1,15 +1,15 @@
 import React from "react";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useCookies } from "react-cookie";
-import { getTimeAgo, speakText } from "@/utils";
+import { speakText } from "@/utils";
 import { CardInHistory } from "@/components/card";
+import { findShouldReviewDatas } from "@/utils";
 
 const GET_WORD_CARD = gql`
   query GetMemoCard($user_id: String!) {
     word_card(
       where: { user_id: { _eq: $user_id }, review_times: { _eq: 0 } }
       order_by: { create_time: desc }
-      limit: 20
     ) {
       id
       word
@@ -100,10 +100,11 @@ export default function WordCardList() {
 
   function handleUnRecognizeClick(item: any) {
     setShowGlass(true);
-    const { id, content, create_time, record_file_path, original_text } =
+    const { id, translation, kana_pronunciation, create_time, record_file_path, original_text } =
       item.memo_card;
     setForgottenCardInfo({
-      content,
+      translation, 
+      kana_pronunciation,
       original_text,
       record_file_path,
       create_time,
@@ -149,7 +150,7 @@ export default function WordCardList() {
         </div>
       ) : null}
       <div className="grid grid-cols-[repeat(auto-fill,_minmax(210px,_1fr))] gap-4">
-        {data?.word_card.map((item, index) => (
+        {findShouldReviewDatas(data?.word_card || []).map((item, index) => (
           <div
             key={index}
             className="word-card w-[240px] h-[150px] rounded-[8px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 mx-auto mt-10 relative"

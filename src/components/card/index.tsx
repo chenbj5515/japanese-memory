@@ -137,6 +137,10 @@ export function CardInHome(props: IProps) {
   const [updateCardRecordPath] = useMutation(UPDATE_CARD_RECORD_PATH);
   const cardRef = React.useRef(null);
 
+  function handleBlurChange(type: string) {
+    setIsFocused(type === "blur" ? false : true);
+  }
+
   React.useEffect(() => {
     let translateDone = false,
       kanaDone = false;
@@ -349,8 +353,8 @@ export function CardInHome(props: IProps) {
       <div className="relative flex flex-col mt-2">
         <Dictation
           originalText={originalText}
-          isFocused={isFocused}
-          setIsFocused={setIsFocused}
+          onBlurChange={handleBlurChange}
+
           cardID={cardIDRef.current}
         />
       </div>
@@ -383,6 +387,10 @@ export function CardInHistory(props: IHistoryCardProps) {
   const kanaTextRef = React.useRef<any>(null);
   const cardRef = React.useRef(forwardRef);
   useShareCardID(forwardRef ?? cardRef, cardID);
+
+  function handleBlurChange(type: string) {
+    setIsFocused(type === "blur" ? false : true);
+  }
 
   const { mediaRecorderRef } = useRecorder({
     async onEnd(recordedChunks) {
@@ -559,9 +567,8 @@ export function CardInHistory(props: IHistoryCardProps) {
       <div className="relative flex flex-col mt-2">
         <Dictation
           originalText={originalText}
-          isFocused={isFocused}
-          setIsFocused={setIsFocused}
           cardID={cardID}
+          onBlurChange={handleBlurChange}
         />
       </div>
     </div>

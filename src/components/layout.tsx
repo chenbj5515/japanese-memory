@@ -65,8 +65,12 @@ export function Layout({ children }: any) {
     router.push("/translate");
   }
 
+  function handleArticleCLick() {
+    router.push("/articles")
+  }
+
   return (
-    <main className="flex flex-col dark:bg-bgDark bg-[#e8e8e8] overflow-scroll">
+    <main className="flex flex-col dark:bg-bgDark bg-[#fff] overflow-scroll">
       <LiveIsland
         className="flex justify-center items-center uppercase"
         smallClassName="text-xs"
@@ -78,29 +82,35 @@ export function Layout({ children }: any) {
             ""
           ) : (
             <div className="flex space-x-2 p-4">
-              <div className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-sm cursor-pointer">
+              {/* <div className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-sm cursor-pointer">
                 <div>earliest</div>
                 <div className="mt-2">20</div>
-              </div>
+              </div> */}
               <div
-                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-sm cursor-pointer"
+                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-[12px] cursor-pointer"
                 onClick={handleLastestClick}
               >
                 <div>latest</div>
                 <div className="mt-2">20</div>
               </div>
               <div
-                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-sm cursor-pointer"
+                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-[12px] cursor-pointer"
                 onClick={handleWordCards}
               >
                 <div>Word</div>
                 <div className="mt-2">Cards</div>
               </div>
               <div
-                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-sm cursor-pointer"
+                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-[12px] cursor-pointer"
                 onClick={handleTranslateCLick}
               >
                 <div>translate</div>
+              </div>
+              <div
+                className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-[12px] cursor-pointer"
+                onClick={handleArticleCLick}
+              >
+                <div>articles</div>
               </div>
             </div>
           )

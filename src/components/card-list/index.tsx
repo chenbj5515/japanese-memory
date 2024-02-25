@@ -70,7 +70,7 @@ export function CardList(props: IProps) {
     if (!historyLists.length && data) {
       dispatch(
         updateHistoryLists({
-          historyLists: findShouldReviewDatas(data),
+          historyLists: findShouldReviewDatas(data.memo_card),
         })
       );
     }
