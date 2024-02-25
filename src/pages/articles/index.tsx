@@ -30,7 +30,7 @@ interface IArticls {
   articles: IArticle[];
 }
 
-export default function () {
+export default function Articles () {
   const [cookies] = useCookies(["user_id"]);
 
   const { loading, data, refetch } = useQuery<IArticls>(GET_ARTICLES, {

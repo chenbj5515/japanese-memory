@@ -6,7 +6,7 @@ import { client } from "@/pages/_app";
 import { formatDate } from "@/utils";
 import Link from "next/link";
 
-export default function ({ source, title, date, others }: any) {
+export default function Article ({ source, title, date, others }: any) {
   return (
     <div className="w-full mt-6 text-left dark:text-[white] max-w-2xl mx-auto lg:mt-12">
       <div className="post-header">
