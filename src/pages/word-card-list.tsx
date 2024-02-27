@@ -8,7 +8,7 @@ import { findShouldReviewDatas } from "@/utils";
 const GET_WORD_CARD = gql`
   query GetMemoCard($user_id: String!) {
     word_card(
-      where: { user_id: { _eq: $user_id }, review_times: { _eq: 0 } }
+      where: { user_id: { _eq: $user_id } }
       order_by: { create_time: desc }
     ) {
       id
