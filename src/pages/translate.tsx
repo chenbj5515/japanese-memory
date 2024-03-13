@@ -3,6 +3,7 @@ import { gql, useQuery } from "@apollo/client";
 import { useCookies } from "react-cookie";
 import { Dictation } from "@/components";
 import { findShouldReviewDatas } from "@/utils";
+import Router from "next/router";
 
 const GET_WORD_CARD = gql`
   query GetMemoCard($user_id: String!) {
@@ -40,12 +41,18 @@ interface IMemoCard {
 export default function Translate() {
   const [cookies] = useCookies(["user_id"]);
 
-  const { loading, data, refetch } = useQuery<IMemoCard>(GET_WORD_CARD, {
+  const { loading, data } = useQuery<IMemoCard>(GET_WORD_CARD, {
     variables: {
       user_id: cookies.user_id,
     },
     fetchPolicy: "no-cache",
   });
+
+  React.useEffect(() => {
+    if (!cookies.user_id) {
+      Router.push("/");
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -61,15 +68,15 @@ export default function Translate() {
     );
   }
 
-  return (
-    findShouldReviewDatas(data?.memo_card || [], "translation")?.map((item, index) => (
-        <div key={index} className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 w-[675px] width-92-675 mx-auto mt-10 relative">
-            {item.translation}
-            <Dictation
-              originalText={item.original_text}
-              cardID={item.id}
-            />
-        </div>
-    ))
+  return findShouldReviewDatas(data?.memo_card || [], "translation")?.map(
+    (item, index) => (
+      <div
+        key={index}
+        className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 w-[675px] width-92-675 mx-auto mt-10 relative"
+      >
+        {item.translation}
+        <Dictation originalText={item.original_text} cardID={item.id} />
+      </div>
+    )
   );
 }

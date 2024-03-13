@@ -3,7 +3,7 @@ import { gql, useQuery, useMutation } from "@apollo/client";
 import { useCookies } from "react-cookie";
 import { speakText } from "@/utils";
 import { CardInHistory } from "@/components/card";
-import { findShouldReviewDatas } from "@/utils";
+import { findShouldReviewDatas, shuffleArray } from "@/utils";
 
 const GET_WORD_CARD = gql`
   query GetMemoCard($user_id: String!) {
@@ -68,8 +68,17 @@ export default function WordCardList() {
     fetchPolicy: "no-cache",
   });
 
+  const [wordList, setWordList] = React.useState<any[]>([]);
+
   const [
-    { translation, kana_pronunciation, original_text, record_file_path, create_time, id },
+    {
+      translation,
+      kana_pronunciation,
+      original_text,
+      record_file_path,
+      create_time,
+      id,
+    },
     setForgottenCardInfo,
   ] = React.useState<any>({});
 
@@ -88,6 +97,10 @@ export default function WordCardList() {
   }
 
   React.useEffect(() => {
+    setWordList(shuffleArray(findShouldReviewDatas(data?.word_card || [])));
+  }, [data]);
+
+  React.useEffect(() => {
     document.addEventListener("mouseup", (event) => {
       const inContainer =
         event.target === containerRef.current ||
@@ -100,10 +113,16 @@ export default function WordCardList() {
 
   function handleUnRecognizeClick(item: any) {
     setShowGlass(true);
-    const { id, translation, kana_pronunciation, create_time, record_file_path, original_text } =
-      item.memo_card;
+    const {
+      id,
+      translation,
+      kana_pronunciation,
+      create_time,
+      record_file_path,
+      original_text,
+    } = item.memo_card;
     setForgottenCardInfo({
-      translation, 
+      translation,
       kana_pronunciation,
       original_text,
       record_file_path,
@@ -150,7 +169,7 @@ export default function WordCardList() {
         </div>
       ) : null}
       <div className="grid grid-cols-[repeat(auto-fill,_minmax(210px,_1fr))] gap-4">
-        {findShouldReviewDatas(data?.word_card || []).map((item, index) => (
+        {wordList.map((item, index) => (
           <div
             key={index}
             className="word-card w-[240px] h-[150px] rounded-[8px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 mx-auto mt-10 relative"
