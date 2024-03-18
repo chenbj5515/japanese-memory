@@ -1,7 +1,7 @@
 import React from "react";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import { useCookies } from "react-cookie";
-import { Dictation } from "@/components";
+import { Dictation, Translate } from "@/components";
 import { findShouldReviewDatas } from "@/utils";
 import Router from "next/router";
 
@@ -23,6 +23,21 @@ const GET_WORD_CARD = gql`
   }
 `;
 
+const UPDATE_TRANSLATION = gql`
+  mutation UpdateMemoCard(
+    $id: uuid!
+    $update_time: timestamptz
+    $translation: String
+  ) {
+    update_memo_card_by_pk(
+      pk_columns: { id: $id }
+      _set: { update_time: $update_time, translation: $translation }
+    ) {
+      id
+    }
+  }
+`;
+
 interface ICard {
   translation: string;
   kana_pronunciation: string;
@@ -38,7 +53,7 @@ interface IMemoCard {
   memo_card: ICard[];
 }
 
-export default function Translate() {
+export default function Translates() {
   const [cookies] = useCookies(["user_id"]);
 
   const { loading, data } = useQuery<IMemoCard>(GET_WORD_CARD, {
@@ -69,14 +84,6 @@ export default function Translate() {
   }
 
   return findShouldReviewDatas(data?.memo_card || [], "translation")?.map(
-    (item, index) => (
-      <div
-        key={index}
-        className="card rounded-[20px] dark:bg-eleDark dark:text-white dark:shadow-dark-shadow p-5 w-[675px] width-92-675 mx-auto mt-10 relative"
-      >
-        {item.translation}
-        <Dictation originalText={item.original_text} cardID={item.id} />
-      </div>
-    )
+    (item, index) => <Translate index={index} item={item} />
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { gql, useMutation } from "@apollo/client";
+import { useRouter } from "next/router";
 import { useCookies } from "react-cookie";
 import "remixicon/fonts/remixicon.css";
 import { client } from "@/pages/_app";
@@ -28,6 +29,7 @@ export default function Welcome() {
   const [, setCookie] = useCookies(["user_id"]);
   const [value, setValue] = React.useState("");
   const [insertUser] = useMutation(INSERT_USER);
+  const router = useRouter();
 
   function handleChange(e: any) {
     setValue(e.target.value);
@@ -49,6 +51,7 @@ export default function Welcome() {
       });
     }
     setCookie("user_id", value, { path: "/" });
+    router.push("/translate");
   }
 
   function handleKeyDown(event: any) {

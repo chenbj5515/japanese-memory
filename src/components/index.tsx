@@ -6,3 +6,4 @@ export * from "./dictation";
 export * from "./welcome";
 export * from "./word-card-adder";
 export * from "./layout";
+export * from "./translate";

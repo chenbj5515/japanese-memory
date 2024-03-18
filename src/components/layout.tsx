@@ -13,7 +13,7 @@ export function Layout({ children }: any) {
   const [cookies] = useCookies(["user_id"]);
   const dispatch = useDispatch();
   const router = useRouter();
-
+  
   async function handleLastestClick() {
     const { data } = await client.query({
       query: gql`
@@ -69,9 +69,11 @@ export function Layout({ children }: any) {
     router.push("/articles");
   }
 
+  console.log(router, "router.route=====")
+
   return (
     <main className="flex flex-col dark:bg-bgDark bg-[#fff] overflow-scroll">
-      {cookies.user_id ? (
+      {router.route !== "/welcome" ? (
         <>
           <LiveIsland
             className="flex justify-center items-center uppercase"

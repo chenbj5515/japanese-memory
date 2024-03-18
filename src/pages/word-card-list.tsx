@@ -93,12 +93,18 @@ export default function WordCardList() {
         review_times,
       },
     });
-    refetch();
+    setWordList(prev => prev.filter(item => item.id !== id));
   }
 
   React.useEffect(() => {
     setWordList(shuffleArray(findShouldReviewDatas(data?.word_card || [])));
   }, [data]);
+
+  React.useEffect(() => {
+    if (wordList.length === 0) {
+      refetch();
+    }
+  }, [wordList]);
 
   React.useEffect(() => {
     document.addEventListener("mouseup", (event) => {
