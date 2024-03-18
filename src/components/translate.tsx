@@ -18,7 +18,7 @@ const UPDATE_TRANSLATION = gql`
 `;
 
 export function Translate(props: any) {
-  const { index, item } = props;
+  const { item } = props;
   const [updateTranslation] = useMutation(UPDATE_TRANSLATION);
   const translationTextRef = React.useRef<any>(null);
   function handleBlur(cardID: string) {
@@ -36,7 +36,6 @@ export function Translate(props: any) {
         <div
           ref={translationTextRef}
           contentEditable
-          key={index}
           onBlur={() => handleBlur(item.id)}
           className="whitespace-pre-wrap pr-[42px] outline-none leading-[3]"
         >

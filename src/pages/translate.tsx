@@ -84,6 +84,6 @@ export default function Translates() {
   }
 
   return findShouldReviewDatas(data?.memo_card || [], "translation")?.map(
-    (item, index) => <Translate index={index} item={item} />
+    (item, index) => <Translate item={item} key={index} />
   );
 }
