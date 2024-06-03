@@ -13,7 +13,7 @@ export function Layout({ children }: any) {
   const [cookies] = useCookies(["user_id"]);
   const dispatch = useDispatch();
   const router = useRouter();
-  
+
   async function handleLastestClick() {
     const { data } = await client.query({
       query: gql`
@@ -48,6 +48,57 @@ export function Layout({ children }: any) {
     router.push("/");
   }
 
+  async function handleRandomClick() {
+    const { data } = await client.query({
+      query: gql`
+        query GetAllMemoCardIDs($user_id: String!) {
+          memo_card(
+            where: { user_id: { _eq: $user_id } }
+          ) {
+            id
+          }
+        }
+      `,
+      variables: {
+        user_id: cookies.user_id,
+      },
+      fetchPolicy: "no-cache",
+    });
+    
+    const randomIDs = data.memo_card.sort(() => 0.5 - Math.random()).slice(0, 20).map((item: any) => item.id);
+
+    const { data: cardData } = await client.query({
+      query: gql`
+        query GetMemoCardDetails($ids: [uuid!]!) {
+          memo_card(
+            where: { id: { _in: $ids } }
+          ) {
+            user_id
+            translation
+            kana_pronunciation
+            original_text
+            record_file_path
+            create_time
+            update_time
+            id
+            review_times
+          }
+        }
+      `,
+      variables: {
+        ids: randomIDs,
+      },
+      fetchPolicy: "no-cache",
+    });
+
+    dispatch(
+      updateHistoryLists({
+        historyLists: cardData.memo_card,
+      })
+    );
+    router.push("/");
+  }
+
   function handleWordCards() {
     router.push("/word-card-list");
   }
@@ -69,8 +120,6 @@ export function Layout({ children }: any) {
     router.push("/articles");
   }
 
-  console.log(router, "router.route=====")
-
   return (
     <main className="flex flex-col dark:bg-bgDark bg-[#fff] overflow-scroll">
       {router.route !== "/welcome" ? (
@@ -91,6 +140,13 @@ export function Layout({ children }: any) {
                     onClick={handleLastestClick}
                   >
                     <div>latest</div>
+                    <div className="mt-2">20</div>
+                  </div>
+                  <div
+                    className=" w-[72px] h-[72px] text-white text-center p-2 rounded-lg text-[12px] cursor-pointer"
+                    onClick={handleRandomClick}
+                  >
+                    <div>random</div>
                     <div className="mt-2">20</div>
                   </div>
                   <div

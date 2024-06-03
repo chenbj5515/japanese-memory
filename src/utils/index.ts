@@ -93,6 +93,6 @@ export function findShouldReviewDatas(dataList: any[], type?: string) {
     }
   }
   return resultList
-    .filter(item => type === "translation" ? item.original_text.length < 50 : true)
+    .filter(item => type === "translation" ? item.original_text.length < 100 : true)
     .slice(0, 20)
 }

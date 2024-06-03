@@ -306,12 +306,22 @@ export function CardInHome(props: IProps) {
           ></path>
         </svg>
       </div>
-      <div className="mb-[28px] relative w-calc100-42">
+      {/* <div className="mb-[28px] relative w-calc100-42">
         <section
           className={`rounded-lg absolute ${
             isFocused ? "glass" : ""
           }  w-[101%] h-[105%] -left-[4px] -top-[2px]`}
         ></section>
+        原文：{originalText}
+      </div> */}
+      <div className="mb-[28px] relative w-calc100-42">
+        {isFocused ? (
+          <section
+            className={`rounded-lg absolute ${
+              isFocused ? "glass" : ""
+            }  w-[101%] h-[105%] -left-[4px] -top-[2px]`}
+          ></section>
+        ) : null}
         原文：{originalText}
       </div>
       中文翻译：<div className="whitespace-pre-wrap pr-[42px]">{tanslationRef.current}</div>
